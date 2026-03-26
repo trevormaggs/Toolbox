@@ -16,7 +16,7 @@ import java.util.List;
  * </p>
  *
  * <p>
- * <b>Note:</b> On Windows, use "cmd.exe /c" to run built-in shell commands.
+ * <b>Note:</b> On Windows, use {@code cmd.exe /c} to run built-in shell commands.
  * </p>
  *
  * @author Trevor Maggs
