@@ -116,13 +116,13 @@ public final class RunCommand
     /**
      * Internal constructor that initialises the command with a raw string.
      * 
-     * @param commandLine
+     * @param command
      *        the initial command string to parse
      */
-    private RunCommand(String commandLine)
+    private RunCommand(String command)
     {
         this();
-        addCommand(commandLine);
+        addCommand(command);
     }
 
     /**
