@@ -16,13 +16,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * 
  * This utility class determines the active {@code JAR} library file from which the current class is
  * running. It identifies the {@code JAR} file name and retrieves the last compilation date and
  * time, effectively capturing the build date of the library.
  * 
  * <p>
- * This class captures the {@code JAR} name accurately at runtime; however, if a {@code JAR} is not
+ * This class captures the {@code JAR} name accurately at runtime, however, if a {@code JAR} is not
  * used (such as during IDE development), it assumes the name of the current running class instead.
  * </p>
  * 
@@ -59,7 +58,7 @@ public final class ProjectBuildInfo
 
         if (resource == null)
         {
-            throw new IllegalStateException("Could not find class resource for " + runningClass.getName());
+            throw new IllegalStateException("Could not find class resource for [" + runningClass.getName() + "]");
         }
 
         try
@@ -143,7 +142,7 @@ public final class ProjectBuildInfo
 
         return sb.toString();
     }
-    
+
     /**
      * Retrieves a resource that specifies the build date stamp of the last successful compilation
      * for your Java development project. This public static factory method provides a convenient
@@ -159,7 +158,7 @@ public final class ProjectBuildInfo
     {
         return new ProjectBuildInfo(currentClass);
     }
-    
+
     /**
      * Retrieves the resource name and the {@code Instant} build time-stamp of the last successful
      * compilation associated with the specified URL resource. If the resource is a JAR library, it
@@ -178,13 +177,13 @@ public final class ProjectBuildInfo
     {
         String protocol = resource.getProtocol();
 
-        if ("file".equals(protocol))
+        if (protocol.equals("file"))
         {
             fpath = Paths.get(resource.toURI());
             buildInstant = Files.getLastModifiedTime(fpath).toInstant();
         }
 
-        else if ("jar".equals(protocol))
+        else if (protocol.equals("jar"))
         {
             String path = resource.getPath();
 
@@ -202,7 +201,7 @@ public final class ProjectBuildInfo
             buildInstant = getJarManifestTimestamp(decodedPath);
         }
 
-        else if ("rsrc".equals(protocol))
+        else if (protocol.equals("rsrc"))
         {
             // Eclipse Jar-in-Jar loader workaround
             String jarCmd = System.getProperty("sun.java.command", "");
@@ -214,7 +213,7 @@ public final class ProjectBuildInfo
 
         else
         {
-            throw new UnsupportedOperationException("Unsupported protocol: " + protocol);
+            throw new UnsupportedOperationException("Unsupported protocol [" + protocol + "]");
         }
     }
 
