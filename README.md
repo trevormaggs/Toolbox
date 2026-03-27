@@ -10,7 +10,7 @@ The **Toolbox** provides a set of lightweight, reusable components. With **Java 
 * **Smart Date Parser:** A robust tool for converting date strings of varying formats into `java.util.Date` and `java.time.ZonedDateTime` objects. 
     * *Optimised for **Australian** (DD/MM/YYYY) patterns while maintaining support for standard **US** (MM/DD/YYYY) and **ISO-8601** formats.*
 * **Project Build Info:** Automatically identifies the active JAR library or class resource at runtime. 
-    * *Retrieves the last successful compilation date and time, providing accurate build metadata for versioning and logging.*
+    * *Retrieves the last successful compilation date and time, providing accurate build metadata for versioning and logging purposes.*
 * **Integration Boilerplate:** Helper classes to standardise communication and data flow between disparate Java modules.
 
 ### 🚀 Getting Started
