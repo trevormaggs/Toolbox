@@ -16,12 +16,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * This utility class determines the active {@code JAR} library file from which the current class is
- * running. It identifies the {@code JAR} file name and retrieves the last compilation date and
- * time, effectively capturing the build date of the library.
+ * Identifies the active {@code JAR} library file from which the current class is running. This
+ * utility obtains the file name and the last compilation date and time, effectively capturing the
+ * build date of the library.
  * 
  * <p>
- * This class captures the {@code JAR} name accurately at runtime, however, if a {@code JAR} is not
+ * This class captures the {@code JAR} name accurately at runtime; however, if a {@code JAR} is not
  * used (such as during IDE development), it assumes the name of the current running class instead.
  * </p>
  * 
@@ -30,7 +30,7 @@ import java.util.jar.JarFile;
  * </p>
  * 
  * <ul>
- * <li>Initial creation on 4 September 4 2023</li>
+ * <li>Initial creation on 4 September 2023</li>
  * </ul>
  * 
  * @author Trevor Maggs
@@ -42,15 +42,11 @@ public final class ProjectBuildInfo
     private Instant buildInstant;
 
     /**
-     * Constructs a private {@code ProjectBuildInfo} object to analyse the active resource, which
-     * can be either a JAR library or the current running class resource. This retrieves the last
-     * successful compilation or build date of the resource.
-     * 
-     * Note that this constructor is not intended for direct use. Instead, use the public static
-     * factory method to indirectly invoke this constructor.
+     * Internal constructor that identifies the source resource (JAR or .class) for the specified
+     * class and extracts its build metadata.
      * 
      * @param runningClass
-     *        the current running class resource being analysed
+     *        the class used to resolve the resource location
      */
     private ProjectBuildInfo(Class<?> runningClass)
     {
@@ -75,7 +71,7 @@ public final class ProjectBuildInfo
     /**
      * Returns the full file system path to the active resource (JAR or class file).
      * 
-     * @return the full path of the resource as a {@link Path} object
+     * @return the full path as a {@link Path} object
      */
     public Path getFullPath()
     {
@@ -112,8 +108,14 @@ public final class ProjectBuildInfo
     }
 
     /**
-     * Returns the build date-time as a legacy {@link Date} object. This provides compatibility with
-     * older APIs while representing the same moment in time as the captured build resource.
+     * Returns the build date-time as a legacy {@link Date} object. This provides backwards
+     * compatibility with older APIs while representing the same point in time as the captured build
+     * resource.
+     * 
+     * <p>
+     * Note: While the internal state uses {@link Instant} precision, this method returns a value
+     * truncated to millisecond precision as required by the {@code Date} class.
+     * </p>
      * 
      * @return a {@link Date} object representing the last modification or compilation time of the
      *         resource
@@ -144,15 +146,14 @@ public final class ProjectBuildInfo
     }
 
     /**
-     * Retrieves a resource that specifies the build date stamp of the last successful compilation
-     * for your Java development project. This public static factory method provides a convenient
-     * way to access the build date information.
+     * Creates a new instance of {@code ProjectBuildInfo} for the specified class. This static
+     * factory method identifies the underlying resource (JAR or class file) and extracts its build
+     * metadata, including the file path and last compilation time.
      * 
      * @param currentClass
-     *        the current running class resource
-     * 
-     * @return an instance of ProjectBuildDate containing the resource name and build date
-     *         information
+     *        the class used to resolve the active resource location
+     * @return an instance of {@link ProjectBuildInfo} containing the resource location and build
+     *         metadata
      */
     public static ProjectBuildInfo getInstance(Class<?> currentClass)
     {
@@ -160,18 +161,21 @@ public final class ProjectBuildInfo
     }
 
     /**
-     * Retrieves the resource name and the {@code Instant} build time-stamp of the last successful
-     * compilation associated with the specified URL resource. If the resource is a JAR library, it
-     * will be identified and its build information obtained. Otherwise, the current running class
-     * resource is assumed.
+     * Internal helper to resolve the resource path and extract build metadata from the specified
+     * URL.
+     * 
+     * <p>
+     * If the URL points to a JAR file, this method extracts the manifest timestamp. Otherwise, it
+     * resolves to the local class file and uses its filesystem modification time.
+     * </p>
      * 
      * @param resource
-     *        the URL instance of the active class resource
+     *        the URL of the active class or JAR resource to be evaluated
      * 
      * @throws URISyntaxException
-     *         if the URI for the specified resource cannot be obtained
+     *         if the URL cannot be converted to a valid URI for path resolution
      * @throws IOException
-     *         if an I/O error occurs during the retrieval process
+     *         if the JAR file or filesystem resource cannot be accessed
      */
     private void readBuildInfo(URL resource) throws URISyntaxException, IOException
     {
@@ -218,33 +222,6 @@ public final class ProjectBuildInfo
     }
 
     /**
-     * Retrieves the build time-stamp from the manifest file (META-INF/MANIFEST.MF) within the
-     * specified JAR file. If the manifest entry is missing, the method falls back to the last
-     * modified time of the JAR file itself.
-     * 
-     * @param jarPath
-     *        the absolute file system path to the JAR resource
-     * @return an {@code Instant} representing the time-stamp of the build
-     * 
-     * @throws IOException
-     *         if an I/O error occurs during the file access or JAR entry retrieval
-     */
-    private Instant getJarManifestTimestamp(String jarPath) throws IOException
-    {
-        try (JarFile jarFile = new JarFile(jarPath))
-        {
-            JarEntry manifest = jarFile.getJarEntry("META-INF/MANIFEST.MF");
-
-            if (manifest != null)
-            {
-                return Instant.ofEpochMilli(manifest.getTime());
-            }
-
-            return Files.getLastModifiedTime(Paths.get(jarPath)).toInstant();
-        }
-    }
-
-    /**
      * Decodes a URL-encoded path string into a standard file system path. This method specifically
      * handles the leading slash often prepended to absolute Windows paths by the ClassLoader, for
      * example: converting {@code /C:/} to {@code C:/}).
@@ -264,5 +241,58 @@ public final class ProjectBuildInfo
         }
 
         return URLDecoder.decode(urlPath, "UTF-8");
+    }
+
+    /**
+     * Retrieves the build time-stamp from the {@code META-INF/MANIFEST.MF} entry within the
+     * specified JAR file.
+     * 
+     * <p>
+     * If the manifest entry cannot be obtained, the method resolves to the last modified time of
+     * the JAR file itself on the file system.
+     * </p>
+     * 
+     * @param jarPath
+     *        the absolute file system path to the JAR resource
+     * @return an {@code Instant} representing the build time, accurate to the limits of the
+     *         JAR/File System metadata
+     * 
+     * @throws IOException
+     *         if an I/O error occurs while accessing the JAR file or its entries
+     */
+    private Instant getJarManifestTimestamp(String jarPath) throws IOException
+    {
+        try (JarFile jarFile = new JarFile(jarPath))
+        {
+            JarEntry manifest = jarFile.getJarEntry("META-INF/MANIFEST.MF");
+
+            if (manifest != null)
+            {
+                return Instant.ofEpochMilli(manifest.getTime());
+            }
+
+            return Files.getLastModifiedTime(Paths.get(jarPath)).toInstant();
+        }
+    }
+    
+    
+    /**
+     * Returns the short name of the JAR library or the current running class resource, with the
+     * {@code .class} extension name removed, providing a concise identifier for the resource.
+     * 
+     * @return the short name of the resource as a {@link Path} object, without the {@code .class}
+     *         extension
+     */
+    public Path getShortFileName()
+    {
+        String ext = ".class";
+        String str = fpath.getFileName().toString();
+
+        if (str.endsWith(ext))
+        {
+            str = str.substring(0, str.length() - ext.length());
+        }
+
+        return Paths.get(str);
     }
 }
