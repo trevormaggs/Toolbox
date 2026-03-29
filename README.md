@@ -6,15 +6,14 @@ A centralised collection of Java 8 utilities and helper classes designed for sea
 The **Toolbox** provides a set of lightweight, reusable components. Built with **Java 8** compatibility in mind, these utilities ensure broad compatibility while leveraging functional programming patterns to keep codebases clean and maintainable.
 
 ### ✨ Key Features
-* **System Discovery (`SystemInfo`):** A high-performance utility that captures hardware architecture, network identity, and OS identifications during class initialisation for zero-overhead retrieval.
-* **Platform Mapping (`OperatingSystem`):** A robust Enum-based system that translates raw system properties and environment strings into strongly-typed metadata. Supports:
-    * **Windows & Server variants** (10, 8.1, 7, etc.)
-    * **Linux distributions** (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)
-    * **Unix flavours** (AIX, Solaris, FreeBSD, HP-UX)
+* **Run Command:** A streamlined utility for executing external system commands (such as `nslookup`, `ipconfig`, or `tracert`) and capturing output streams for easy processing.
+* **Project Build Info:** Automatically identifies the active JAR library or class resource at runtime to retrieve compilation timestamps and build metadata.
+* **Smart Date Parser:** A robust tool for converting date strings of varying formats into `java.util.Date` and `java.time.ZonedDateTime` objects.
+    * **Optimised for **Australian** (DD/MM/YYYY) patterns while maintaining support for standard **US** (MM/DD/YYYY) and **ISO-8601** formats.*
+* **System Discovery (`SystemInfo`):** A high-performance utility that captures hardware architecture, network identity, and OS identifications during class initialisation for ease of retrieval.
+* **Platform Mapping (`OperatingSystem`):** A robust Enum-based system that translates raw system properties and environment strings into strongly-typed metadata, supporting such as **Windows and Server variants**, **most Linux variants (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)** and **Unix flavours (AIX, Solaris, FreeBSD, HP-UX)**.
 * **Look-Ahead Iterator (`PeekingIterator`):** An enhanced iterator interface that supports **LL(1)** parsing patterns. It allows developers to "peek" at the next element without advancing the cursor—essential for complex command-line argument processing.
-* **Run Command:** A streamlined utility for executing external system commands (such as `nslookup`, `ipconfig`, or `tracert`) and capturing output streams for programmatic analysis.
-* **Smart Date Parser:** A robust tool for converting date strings of varying formats into `java.util.Date` and `java.time.ZonedDateTime` objects. 
-    * *Optimised for **Australian** (DD/MM/YYYY) patterns while maintaining support for standard **US** and **ISO-8601** formats.* * **Project Build Info:** Automatically identifies the active JAR library or class resource at runtime to retrieve compilation timestamps and build metadata.
+* **Integration Boilerplate:** Helper classes to standardise communication and data flow between disparate Java modules.
 
 ### 📁 Project Structure (util)
 ```text
@@ -30,7 +29,7 @@ util/
 ### 🚀 Getting Started
 
 #### Prerequisites
-* **Java 8 (JDK 1.8)**
+* **Java 8 (JDK 1.8) is a minimum**
 
 #### Installation & Build
 To include these utilities in your local environment:
