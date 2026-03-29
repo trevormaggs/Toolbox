@@ -11,7 +11,33 @@ The **Toolbox** provides a set of lightweight, reusable components. With **Java 
     * *Optimised for **Australian** (DD/MM/YYYY) patterns while maintaining support for standard **US** (MM/DD/YYYY) and **ISO-8601** formats.*
 * **Project Build Info:** Automatically identifies the active JAR library or class resource at runtime. 
     * *Retrieves the last successful compilation date and time, providing accurate build metadata for versioning and logging purposes.*
+* **Project Build Info:** Automatically identifies the active JAR library or class resource at runtime to retrieve compilation timestamps and build metadata.
+
+
+* **Native Execution (`RunCommand`):** A streamlined utility for executing external system commands (such as `nslookup`, `oslevel`, or `tracert`) and capturing output streams for programmatic analysis.
+* **Smart Date Parser:** A robust tool for converting date strings of varying formats into `java.util.Date` and `java.time.ZonedDateTime` objects. 
+    * *Optimised for **Australian** (DD/MM/YYYY) patterns.*
+
+    
+* **System Discovery (`SystemInfo`):** A high-performance utility that captures hardware architecture, network identity, and OS specifics during class initialisation for zero-overhead retrieval.
+* **Platform Mapping (`OperatingSystem`):** A robust Enum-based system that translates raw system properties and environment strings into strongly-typed metadata. Supports detailed identification for:
+    * **Windows:** (10, 8.1, 7, Server variants)
+    * **Linux:** (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)
+    * **Unix:** (AIX, Solaris, FreeBSD, HP-UX)
+* **Look-Ahead Iterator (`PeekingIterator`):** An enhanced iterator interface that supports **LL(1)** parsing patterns. It allows developers to "peek" at the next element without advancing the cursor—essential for complex command-line argument processing.
+    
 * **Integration Boilerplate:** Helper classes to standardise communication and data flow between disparate Java modules.
+
+
+### 📁 Project Structure (util)
+```text
+util/
+├── OperatingSystem.java  # Platform constants & version metadata
+├── PeekingIterator.java  # LL(1) Look-ahead utility
+├── RunCommand.java       # Native process execution wrapper
+├── SystemInfo.java       # Centralised hardware & OS metadata
+└── ... (Date & Build utilities)
+```
 
 ### 🚀 Getting Started
 

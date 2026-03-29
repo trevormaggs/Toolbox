@@ -29,7 +29,9 @@ public enum OperatingSystem
 {
     /* Also see https://www.techthoughts.info/windows-version-numbers */
     MACOS("macOS", 0.0, false),
-    LNX("Linux", 0.0, true),
+    AMZN("Amazon Linux", 0.0, true),
+    ALPINE("Alpine Linux", 0.0, true),
+    LINUX("Linux", 0.0, true),
     AIX("AIX", 0.0, true),
     CENTOS("CentOS", 0.0, true),
     DEBIAN("Debian", 0.0, true),
@@ -139,7 +141,7 @@ public enum OperatingSystem
 
     /**
      * Searches for a matching Operating System enumeration value based on the specified abbreviated
-     * name or constant string, such as {@code win2012r2} or {@code WIN10}.
+     * name or constant string, such as {@code ubuntu}, {@code amzn}, or {@code WIN10}.
      *
      * @param osName
      *        the Operating System name in its short or abbreviated name format
@@ -147,12 +149,28 @@ public enum OperatingSystem
      */
     public static OperatingSystem fromAbbreviation(String osName)
     {
-        if (osName != null)
+        if (osName != null && !osName.isEmpty())
         {
+            String searchName = osName.toLowerCase().trim();
+
+            switch (searchName)
+            {
+                case "ubuntu":
+                    searchName = "ubn";
+                break;
+
+                case "raspbian":
+                    searchName = "debian";
+                break;
+
+                case "ol":
+                    searchName = "ovm";
+                break;
+            }
+
             for (OperatingSystem os : OperatingSystem.values())
             {
-                // Compares against the Enum constant name (e.g., "WIN10")
-                if (os.name().equalsIgnoreCase(osName))
+                if (os.name().equalsIgnoreCase(searchName))
                 {
                     return os;
                 }
@@ -177,6 +195,23 @@ public enum OperatingSystem
             for (OperatingSystem os : OperatingSystem.values())
             {
                 if (os.getRealName().equalsIgnoreCase(osName))
+                {
+                    return os;
+                }
+            }
+        }
+
+        return UNKNOWN;
+    }
+
+    @Deprecated
+    public static OperatingSystem fromAbbreviation2(String osName)
+    {
+        if (osName != null)
+        {
+            for (OperatingSystem os : OperatingSystem.values())
+            {
+                if (os.name().equalsIgnoreCase(osName))
                 {
                     return os;
                 }

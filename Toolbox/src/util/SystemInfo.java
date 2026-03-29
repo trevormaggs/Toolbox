@@ -9,22 +9,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Provides a centralised utility for retrieving core system metadata, including hardware
+ * architecture, network identity, and operating system specifics.
+ * 
  * <p>
- * Provides basic system information describing a computer system. Basically, every piece of
- * information collected is stored in a single POJO object for effective retrieval.
+ * Data is captured once during class initialisation and stored in an internal immutable-like state
+ * to ensure high-performance retrieval and consistency across the application lifecycle.
  * </p>
  * 
  * <p>
- * Real values for the following items can be obtained through static methods provided.
+ * Following list of possible values you can obtain.
  * </p>
- * 
+ *
  * <ul>
  * <li>Operating system name</li>
  * <li>Alternative operating system name</li>
@@ -35,23 +36,21 @@ import java.util.regex.Pattern;
  * <li>Architecture type ie x86, amd64 etc</li>
  * <li>Architecture data model, 32-bit or 64-bit</li>
  * </ul>
- * 
+ *
+ *
  * <p>
- * <b>Supported platform:</b> Windows and *NIX operating systems
- * </p>
- * 
- * <p>
- * <b>Change logs:</b>
+ * <b>Change History</b>
  * </p>
  * 
  * <ul>
  * <li>Trevor Maggs created on 6 April 2016</li>
  * <li>Changed from Host to SystemInfo static only class on 12 April 2019</li>
+ * <li>Improved logic in many methods. 29 March 2026</li>
  * </ul>
  * 
  * @author Trevor Maggs
- * @version 0.2
- * @since 6 April 2016
+ * @version 0.3
+ * @since 29 March 2026
  */
 public final class SystemInfo
 {
@@ -130,68 +129,266 @@ public final class SystemInfo
     }
 
     /**
-     * Declares an explicit private constructor to suppress default constructor creation.
+     * Default constructor will always throw an exception.
+     *
+     * @throws UnsupportedOperationException
+     *         to indicate that instantiation is not supported
      */
     private SystemInfo()
     {
+        throw new UnsupportedOperationException("Not intended for instantiation");
     }
 
     /**
-     * Gathers system information from the local host.
-     * 
-     * If the program is unable to retrieve information from the operating system, it will terminate
-     * the program. While I don't expect it to happen, but if it does, please contact the
-     * development team lead.
+     * Gets the hostname of the computer system.
+     *
+     * @return the current hostname
      */
-    private static void collectSystemInfo()
+    public static String getHostname()
     {
+        return sysInfo.hostname;
+    }
+
+    /**
+     * Gets the IP address.
+     *
+     * @return the configured IP address
+     */
+    public static String getIPaddress()
+    {
+        return sysInfo.ip_address;
+    }
+
+    /**
+     * Gets the current running Operating System name.
+     *
+     * @return the abbreviated OS name
+     */
+    public static String getOSName()
+    {
+        return sysInfo.getPlatformName();
+    }
+
+    /**
+     * Gets the real OS variant or flavour name, such as Windows 2000, Fedora, CentOS etc.
+     *
+     * @return the real Operating System name
+     */
+    public static String getOperatingSystemRealName()
+    {
+        return sysInfo.platform.getRealName();
+    }
+
+    /**
+     * Returns the current running Operating System.
+     *
+     * Note, this method is similar to the {@code getOSName()} method, except it returns the
+     * {@code OperatingSystem} type.
+     *
+     * @return constant name based on the OperatingSystem type
+     */
+    public static OperatingSystem getPlatformName()
+    {
+        return sysInfo.platform;
+    }
+
+    /**
+     * Gets the OS version in the string format.
+     *
+     * @return OS version
+     */
+    public static String getOsVersion()
+    {
+        return sysInfo.version;
+    }
+
+    /**
+     * Gets the OS version in the form of real number (double).
+     *
+     * @return OS version
+     */
+    public static double getOsVersionDigit()
+    {
+        return (sysInfo.version.matches("-?\\d+(\\.\\d+)?") ? Double.parseDouble(sysInfo.version) : 0);
+    }
+
+    /**
+     * Gets the architecture name. For example, x86, amd64, etc.
+     *
+     * @return the architecture name
+     */
+    public static String getArchitecture()
+    {
+        return OS_ARCH;
+    }
+
+    /**
+     * Returns the Architecture Data Model of the JRE, either 32-bit or 64-bit.
+     *
+     * @return 32-bit or 64-bit as a byte value
+     */
+    public static byte getArchitectureDataModel()
+    {
+        return sysInfo.data_model;
+    }
+
+    /**
+     * Queries the computer system to determine whether the specified operating system is running.
+     *
+     * @param osName
+     *        the operating system name to check for. The name is a constant derived from the
+     *        {@code OperatingSystem} enumeration class. For example,
+     *        {@code SystemInfo.isRunningOS(DEBIAN)} will return true if the Debian operating system
+     *        is found running
+     *
+     * @return boolean true if the specified operating system is present
+     * @throws IllegalArgumentException
+     *         if any parameters are unrecognised
+     */
+    public static boolean isRunningOS(OperatingSystem osName)
+    {
+        return isRunningOS(EnumSet.of(osName));
+    }
+
+    /**
+     * Evaluates if the current operating system matches against the specified set.
+     * 
+     * @param osNameSet
+     *        A set of {@link OperatingSystem} constants to check against.
+     * @return {@code true} if the current platform is contained within the set.
+     * 
+     * @throws IllegalArgumentException
+     *         if the specified set is null or empty
+     */
+    public static boolean isRunningOS(EnumSet<OperatingSystem> osNameSet)
+    {
+        // https://www.superglobals.net/java-bitmask-enum-example
+        // https://howtodoinjava.com/java/enum/java-enum-string-example
+
+        if (osNameSet == null || osNameSet.isEmpty())
+        {
+            throw new IllegalArgumentException("Undefined EnumSet values");
+        }
+
         try
         {
-            readLocalHostName();
-            readLocalIPaddress();
-            readJavaArchitectureInfo();
-
-            if (IS_AIX)
-            {
-                readSystemInfoAIX();
-            }
-
-            else if (IS_FREEBSD)
-            {
-                readSystemInfoFreebsd();
-            }
-
-            else if (IS_HPUX)
-            {
-                readSystemInfoHPUX();
-            }
-
-            else if (IS_LINUX)
-            {
-                readSystemInfoLinux();
-            }
-
-            else if (IS_SOLARIS)
-            {
-                readSystemInfoSolaris();
-            }
-
-            else if (IS_WINDOWS)
-            {
-                readSystemInfoWindows();
-            }
+            return (osNameSet.contains(sysInfo.platform));
         }
 
-        catch (IOException exc)
+        catch (IllegalArgumentException exc)
         {
-            sysInfo.platform = OperatingSystem.UNKNOWN;
-            System.err.println(exc.getMessage());
+            throw new IllegalArgumentException("Unrecognised enum constant [" + sysInfo.platform.toString() + "]", exc);
         }
     }
 
     /**
-     * Queries the computer system to obtain the host name. If the name is a fully qualified domain
-     * name, the host name portion will only be extracted.
+     * Checks whether the platform is a Power PC hardware.
+     *
+     * @return boolean true if the hardware is a Power PC system
+     */
+    public static boolean isPowerPcHardware()
+    {
+        return IS_PPC;
+    }
+
+    /**
+     * Checks whether the platform is a SPARC hardware.
+     *
+     * @return boolean true if the hardware is a SPARC type
+     */
+    public static boolean isSparcHardware()
+    {
+        return IS_SPARC;
+    }
+
+    /**
+     * Checks whether the running OS is based on UNIX.
+     *
+     * @return boolean true if the platform is running UNIX
+     */
+    public static boolean isUnixSystem()
+    {
+        return IS_UNIX;
+    }
+
+    /**
+     * Checks whether AIX is the current operating system.
+     *
+     * @return boolean true if AIX is running
+     */
+    public static boolean isAIX()
+    {
+        return IS_AIX;
+    }
+
+    /**
+     * Checks whether FreeBSD is the current operating system.
+     *
+     * @return boolean true if FreeBSD is running
+     */
+    public static boolean isFreeBSD()
+    {
+        return IS_FREEBSD;
+    }
+
+    /**
+     * Checks whether HP-UX is the current operating system.
+     *
+     * @return boolean true if HP-UX is running
+     */
+    public static boolean isHPUX()
+    {
+        return IS_HPUX;
+    }
+
+    /**
+     * Checks whether Linux is running.
+     *
+     * @return boolean true if Linux is running
+     */
+    public static boolean isLinux()
+    {
+        return IS_LINUX;
+    }
+
+    /**
+     * Checks whether Solaris is the current operating system.
+     *
+     * @return boolean true if Solaris is running
+     */
+    public static boolean isSolaris()
+    {
+        return IS_SOLARIS;
+    }
+
+    /**
+     * Checks whether Windows is running.
+     *
+     * @return boolean true if Windows is running
+     */
+    public static boolean isWindows()
+    {
+        return IS_WINDOWS;
+    }
+
+    /**
+     * Displays the system information.
+     */
+    public static void displaySystemInfo()
+    {
+        System.out.println(sysInfo);
+    }
+
+    /*-------------------- PRIVATE STATIC METHODS -------------------- */
+
+    /**
+     * Resolves the local hostname.
+     * 
+     * <p>
+     * Prefers the Java Networking API. If a Fully Qualified Domain Name (FQDN) is returned, this
+     * method truncates it to provide the short hostname only, for example: 'server01' instead of
+     * 'server01.network.com'.
+     * </p>
      */
     private static void readLocalHostName()
     {
@@ -201,9 +398,6 @@ public final class SystemInfo
 
             // Example: update oc7456161242.ibm.com to oc7456161242
             sysInfo.hostname = fqdn.split("\\.")[0];
-
-            // To get the Canonical host name -for debugging purposes.
-            // String canonicalHostName = iAddress.getCanonicalHostName();
         }
 
         catch (UnknownHostException exc)
@@ -217,7 +411,7 @@ public final class SystemInfo
      * If the {@code readLocalHostName} method cannot obtain the host name for any reason, it will
      * alternatively execute the {@code hostname} command directly on the computer system in an
      * attempt to fetch the required name.
-     * 
+     *
      * If that host name, however, cannot be obtained, a string "UNKNOWN" will be provided.
      */
     private static void readLocalHostNameByCommand()
@@ -263,7 +457,7 @@ public final class SystemInfo
 
     /**
      * Queries the AIX operating system to obtain the basic system information.
-     * 
+     *
      * @throws IOException
      *         if it is unable to obtain the information
      */
@@ -323,101 +517,12 @@ public final class SystemInfo
     }
 
     /**
-     * Queries the Linux operating system to obtain basic the system information.
-     * 
+     * Queries the Linux operating system to obtain basic system information.
+     *
      * @throws IOException
      *         if it is unable to obtain the information
      */
     private static void readSystemInfoLinux() throws IOException
-    {
-        class LinuxRelease
-        {
-            final String file;
-            final String regex;
-            final OperatingSystem meta;
-
-            LinuxRelease(String f, String r, OperatingSystem m)
-            {
-                file = f;
-                regex = r;
-                meta = m;
-            }
-        }
-
-        Set<LinuxRelease> release = new HashSet<>();
-
-        // http://superuser.com/questions/11008/how-do-i-find-out-what-version-of-linux-im-running
-        release.add(new LinuxRelease("/etc/debian_version", "(\\d+\\.?\\d+)", OperatingSystem.DEBIAN));
-        release.add(new LinuxRelease("/etc/debian_release", "(\\d+\\.?\\d+)", OperatingSystem.DEBIAN));
-        release.add(new LinuxRelease("/etc/SuSE-release", "^\\s*VERSION\\s+=\\s+([0-9\\.]+)\\s*", OperatingSystem.SUSE));
-        release.add(new LinuxRelease("/etc/sles-release", "^\\s*VERSION\\s+=\\s+([0-9\\.]+)\\s*", OperatingSystem.SUSE));
-        release.add(new LinuxRelease("/etc/novell-release", "^\\s*VERSION\\s+=\\s+([0-9\\.]+)\\s*", OperatingSystem.SUSE));
-        release.add(new LinuxRelease("/etc/centos-release", "(\\d+\\.?\\d+)", OperatingSystem.CENTOS));
-        release.add(new LinuxRelease("/etc/redhat-release", "\\s*CentOS.*(\\d+\\.?\\d+)", OperatingSystem.CENTOS));
-        release.add(new LinuxRelease("/etc/fedora-release", "Fedora[^\\d]+(\\d+)", OperatingSystem.FEDORA));
-        release.add(new LinuxRelease("/etc/redhat-release", "\\s*Oracle VM.*(\\d+\\.?\\d+)", OperatingSystem.OVM));
-        release.add(new LinuxRelease("/etc/redhat-release", "Red Hat Enterprise Linux.+(\\d+\\.?\\d+)", OperatingSystem.RHEL));
-        release.add(new LinuxRelease("/etc/os-release", "^ID=(.+)$", OperatingSystem.UNKNOWN));
-
-        /*
-         * # cat /etc/redhat-release
-         * Red Hat Enterprise Linux Server release 6.7 (Santiago)
-         * 
-         * # cat /etc/redhat-release
-         * Red Hat Enterprise Linux Workstation release 7.7 (Maipo)
-         * 
-         * # cat /etc/SuSE-release
-         * SUSE Linux Enterprise Server 10 (x86_64)
-         * VERSION = 10
-         * PATCHLEVEL = 4
-         * 
-         * # cat /etc/centos-release
-         * CentOS release 6.3 (Final)
-         * 
-         * # cat /etc/fedora-release
-         * Fedora release 24 (Twenty Four)
-         * 
-         * # cat /etc/redhat-release
-         * Oracle VM server release 3.3.2
-         */
-
-        for (LinuxRelease info : release)
-        {
-            Path releaseFile = Paths.get(info.file);
-
-            if (Files.exists(releaseFile))
-            {
-                try (BufferedReader br = Files.newBufferedReader(releaseFile, StandardCharsets.UTF_8))
-                {
-                    String line;
-
-                    while ((line = br.readLine()) != null)
-                    {
-                        if (PatternMatch.matches(info.regex, line))
-                        {
-                            sysInfo.platform = info.meta;
-                            sysInfo.version = PatternMatch.extract(1);
-
-                            return;
-                        }
-                    }
-                }
-
-                catch (IOException exc)
-                {
-                    throw new IOException("Unable to read release file [" + releaseFile + "] from Linux", exc);
-                }
-            }
-        }
-    }
-
-    /**
-     * Queries the Linux operating system to obtain basic system information.
-     * 
-     * @throws IOException
-     *         if it is unable to obtain the information
-     */
-    private static void readSystemInfoLinux2() throws IOException
     {
         class LinuxRelease
         {
@@ -436,21 +541,21 @@ public final class SystemInfo
         /*
          * # cat /etc/redhat-release
          * Red Hat Enterprise Linux Server release 6.7 (Santiago)
-         * 
+         *
          * # cat /etc/redhat-release
          * Red Hat Enterprise Linux Workstation release 7.7 (Maipo)
-         * 
+         *
          * # cat /etc/SuSE-release
          * SUSE Linux Enterprise Server 10 (x86_64)
          * VERSION = 10
          * PATCHLEVEL = 4
-         * 
+         *
          * # cat /etc/centos-release
          * CentOS release 6.3 (Final)
-         * 
+         *
          * # cat /etc/fedora-release
          * Fedora release 24 (Twenty Four)
-         * 
+         *
          * # cat /etc/redhat-release
          * Oracle VM server release 3.3.2
          */
@@ -540,7 +645,7 @@ public final class SystemInfo
 
     /**
      * Queries the Solaris operating system to obtain the basic system information.
-     * 
+     *
      * @throws IOException
      *         if it is unable to obtain the information
      */
@@ -579,7 +684,7 @@ public final class SystemInfo
 
     /**
      * Queries the Windows operating system to obtain the basic system information.
-     * 
+     *
      * <p>
      * Note, the version of each Windows operating system is uniquely assigned a numerical
      * identifier. Refer to the list of the known Windows versions below.
@@ -588,7 +693,7 @@ public final class SystemInfo
      * <p>
      * <b>Server versions</b>
      * </p>
-     * 
+     *
      * <ul>
      * <li>Windows Server 2019 = ver 10.0</li>
      * <li>Windows Server 2016 = ver 10.0</li>
@@ -608,7 +713,7 @@ public final class SystemInfo
      * <p>
      * <b>Workstation versions</b>
      * </p>
-     * 
+     *
      * <ul>
      * <li>Windows 10 = ver 10.0</li>
      * <li>Windows 8.1 = ver 6.3</li>
@@ -622,12 +727,11 @@ public final class SystemInfo
      * <li>Windows 98 = ver 4.1</li>
      * <li>Windows 95 = ver 4.0</li>
      * </ul>
-     * 
-     * <p>
-     * See <a target="_top" href=
-     * "https://docs.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version">https://docs.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version</a>
-     * </p>
-     * 
+     *
+     * @see <a href=
+     *      "https://docs.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version">Windows
+     *      OS Versions</a>
+     *
      * @throws IOException
      *         if it is unable to obtain the information
      */
@@ -646,253 +750,61 @@ public final class SystemInfo
             }
         }
 
-        throw new IOException("Unable to query the Windows Operating SystemXX");
+        throw new IOException("Unable to query the Windows Operating System");
     }
 
-    /*
-     * -------------- PUBLIC STATIC METHODS --------------
-     */
-
     /**
-     * Queries the computer system to determine whether the specified operating system is running.
+     * Manages the collection of system properties.
      * 
-     * @param osNameSet
-     *        any constant names defined in the {@code OperatingSystem} enumeration class. In other
-     *        words, checking for multiple operating system names is possible. For example,
-     *        {@code SystemInfo.isRunningOS(EnumSet.of(DEBIAN, RHEL, SUSE)))} will return true if
-     *        either Red Hat, Debian or SuSE is the running operating system
-     * 
-     * @return boolean true if one of the specified operating systems is present
-     * @throws IllegalArgumentException
-     *         if any parameters are unrecognised
+     * <p>
+     * This method attempts to resolve identity and OS traits through a hierarchy of Java System
+     * properties and native shell commands. If a specific OS-level query fails, the error is logged
+     * to stderr and the platform defaults to {@link OperatingSystem#UNKNOWN}.
+     * </p>
      */
-    public static boolean isRunningOS(EnumSet<OperatingSystem> osNameSet)
+    private static void collectSystemInfo()
     {
-        // https://www.superglobals.net/java-bitmask-enum-example
-        // https://howtodoinjava.com/java/enum/java-enum-string-example
-
-        if (osNameSet == null || osNameSet.isEmpty())
-        {
-            throw new IllegalArgumentException("Undefined EnumSet values");
-        }
-
         try
         {
-            return (osNameSet.contains(sysInfo.platform));
+            readLocalHostName();
+            readLocalIPaddress();
+            readJavaArchitectureInfo();
+
+            if (IS_AIX)
+            {
+                readSystemInfoAIX();
+            }
+
+            else if (IS_FREEBSD)
+            {
+                readSystemInfoFreebsd();
+            }
+
+            else if (IS_HPUX)
+            {
+                readSystemInfoHPUX();
+            }
+
+            else if (IS_LINUX)
+            {
+                readSystemInfoLinux();
+            }
+
+            else if (IS_SOLARIS)
+            {
+                readSystemInfoSolaris();
+            }
+
+            else if (IS_WINDOWS)
+            {
+                readSystemInfoWindows();
+            }
         }
 
-        catch (IllegalArgumentException exc)
+        catch (IOException exc)
         {
-            throw new IllegalArgumentException("Unrecognised enum constant [" + sysInfo.platform.toString() + "]", exc);
+            sysInfo.platform = OperatingSystem.UNKNOWN;
+            System.err.println(exc.getMessage());
         }
-    }
-
-    /**
-     * Queries the computer system to determine whether the specified operating system is running.
-     * 
-     * @param osName
-     *        the operating system name to check for. The name is a constant derived from the
-     *        {@code OperatingSystem} enumeration class. For example,
-     *        {@code SystemInfo.isRunningOS(DEBIAN)} will return true if the Debian operating system
-     *        is found running
-     * 
-     * @return boolean true if the specified operating system is present
-     * @throws IllegalArgumentException
-     *         if any parameters are unrecognised
-     */
-    public static boolean isRunningOS(OperatingSystem osName)
-    {
-        return isRunningOS(EnumSet.of(osName));
-    }
-
-    /**
-     * Gets the architecture name. For example, x86, amd64, etc.
-     * 
-     * @return the architecture name
-     */
-    public static String getArchitecture()
-    {
-        return OS_ARCH;
-    }
-
-    /**
-     * Returns the Architecture Data Model of the JRE, either 32-bit or 64-bit.
-     * 
-     * @return byte indicating either 32-bit or 64-bit
-     */
-    public static byte getArchitectureDataModel()
-    {
-        return sysInfo.data_model;
-    }
-
-    /**
-     * Checks whether the platform is a Power PC hardware.
-     * 
-     * @return boolean true if the hardware is a Power PC system
-     */
-    public static boolean isPowerPcHardware()
-    {
-        return IS_PPC;
-    }
-
-    /**
-     * Checks whether the platform is a SPARC hardware.
-     * 
-     * @return boolean true if the hardware is a SPARC type
-     */
-    public static boolean isSparcHardware()
-    {
-        return IS_SPARC;
-    }
-
-    /**
-     * Checks whether the running OS is based on UNIX.
-     * 
-     * @return boolean true if the platform is running UNIX
-     */
-    public static boolean isUnixSystem()
-    {
-        return IS_UNIX;
-    }
-
-    /**
-     * Checks whether AIX is the current operating system.
-     * 
-     * @return boolean true if AIX is running
-     */
-    public static boolean isAIX()
-    {
-        return IS_AIX;
-    }
-
-    /**
-     * Checks whether FreeBSD is the current operating system.
-     * 
-     * @return boolean true if FreeBSD is running
-     */
-    public static boolean isFreeBSD()
-    {
-        return IS_FREEBSD;
-    }
-
-    /**
-     * Checks whether HP-UX is the current operating system.
-     * 
-     * @return boolean true if HP-UX is running
-     */
-    public static boolean isHPUX()
-    {
-        return IS_HPUX;
-    }
-
-    /**
-     * Checks whether Linux is running.
-     * 
-     * @return boolean true if Linux is running
-     */
-    public static boolean isLinux()
-    {
-        return IS_LINUX;
-    }
-
-    /**
-     * Checks whether Solaris is the current operating system.
-     * 
-     * @return boolean true if Solaris is running
-     */
-    public static boolean isSolaris()
-    {
-        return IS_SOLARIS;
-    }
-
-    /**
-     * Checks whether Windows is running.
-     * 
-     * @return boolean true if Windows is running
-     */
-    public static boolean isWindows()
-    {
-        return IS_WINDOWS;
-    }
-
-    /**
-     * Gets the hostname of the computer system.
-     * 
-     * @return the current hostname
-     */
-    public static String getHostname()
-    {
-        return sysInfo.hostname;
-    }
-
-    /**
-     * Gets the IP address.
-     * 
-     * @return the configured IP address
-     */
-    public static String getIPaddress()
-    {
-        return sysInfo.ip_address;
-    }
-
-    /**
-     * Returns the current running Operating System.
-     * 
-     * Note, this method is similar to the {@code getOSName()} method, except it returns the
-     * {@code OperatingSystem} type.
-     * 
-     * @return constant name based on the OperatingSystem type
-     */
-    public static OperatingSystem getPlatformName()
-    {
-        return sysInfo.platform;
-    }
-
-    /**
-     * Gets the current running Operating System name.
-     * 
-     * @return the abbreviated OS name
-     */
-    public static String getOSName()
-    {
-        return sysInfo.getPlatformName();
-    }
-
-    /**
-     * Gets the real OS variant or flavour name, ie Windows 2000, Fedora, CentOS etc.
-     * 
-     * @return the real Operating System name
-     */
-    public static String getOperatingSystemRealName()
-    {
-        return sysInfo.platform.getRealName();
-    }
-
-    /**
-     * Gets the OS version in the string format.
-     * 
-     * @return OS version
-     */
-    public static String getOsVersion()
-    {
-        return sysInfo.version;
-    }
-
-    /**
-     * Gets the OS version in the form of real number (double).
-     * 
-     * @return OS version
-     */
-    public static double getOsVersionDigit()
-    {
-        return (sysInfo.version.matches("-?\\d+(\\.\\d+)?") ? Double.parseDouble(sysInfo.version) : 0);
-    }
-
-    /**
-     * Displays the system information.
-     */
-    public static void displaySystemInfo()
-    {
-        System.out.println(sysInfo);
     }
 }
