@@ -203,21 +203,4 @@ public enum OperatingSystem
 
         return UNKNOWN;
     }
-
-    @Deprecated
-    public static OperatingSystem fromAbbreviation2(String osName)
-    {
-        if (osName != null)
-        {
-            for (OperatingSystem os : OperatingSystem.values())
-            {
-                if (os.name().equalsIgnoreCase(osName))
-                {
-                    return os;
-                }
-            }
-        }
-
-        return UNKNOWN;
-    }
 }
