@@ -36,9 +36,9 @@ util/
 #### Installation & Build
 To include these utilities in your local environment:
 1. **Clone the repository:**
-```
-	bash git clone [https://github.com/trevormaggs/Toolbox.git](https://github.com/trevormaggs/Toolbox.git)
-```
+    ```bash
+    git clone https://github.com/trevormaggs/Toolbox.git
+    ```
 
 ### 🤝 Collaboration & Feedback
 
