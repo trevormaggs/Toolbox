@@ -21,7 +21,7 @@ util/
 * **Run Command:** A streamlined utility for executing external system commands (such as `nslookup`, `ipconfig`, or `tracert`) and capturing output streams for easy processing.
 * **Project Build Info:** Automatically identifies the active JAR library or class resource at runtime to retrieve compilation timestamps and build metadata.
 * **Smart Date Parser:** A robust tool for converting date strings of varying formats into `java.util.Date` and `java.time.ZonedDateTime` objects.
-    * **Optimised for **Australian** (DD/MM/YYYY) patterns while maintaining support for standard **US** (MM/DD/YYYY) and **ISO-8601** formats.*
+    * *Optimised for **Australian** (DD/MM/YYYY) patterns while maintaining support for standard **US** (MM/DD/YYYY) and **ISO-8601** formats.*
 * **System Discovery (`SystemInfo`):** A high-performance utility that captures hardware architecture, network identity, and OS identifications during class initialisation for ease of retrieval.
 * **Platform Mapping (`OperatingSystem`):** A robust Enum-based system that translates raw system properties and environment strings into strongly-typed metadata, supporting such as **Windows and Server variants**, **most Linux variants (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)** and **Unix flavours (AIX, Solaris, FreeBSD, HP-UX)**.
 * **Look-Ahead Iterator (`PeekingIterator`):** An enhanced iterator interface that supports **LL(1)** parsing patterns. It allows developers to "peek" at the next element without advancing the cursor—essential for complex command-line argument processing.
