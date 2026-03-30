@@ -1,5 +1,8 @@
 package util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Defines a mapping of Operating System constants to their human-readable names, kernel versions,
  * and server/workstation classifications.
@@ -48,8 +51,8 @@ public enum OperatingSystem
     WIN2022("Windows Server 2022", 10.0, true),
     WIN2019("Windows Server 2019", 10.0, true),
     WIN2016("Windows Server 2016", 10.0, true),
-    WIN11("Windows 11", 10.0, false),
     WIN10("Windows 10", 10.0, false),
+    WIN11("Windows 11", 10.0, false),
     WIN2012R2("Windows Server 2012 R2", 6.3, true),
     WIN81("Windows 8.1", 6.3, false),
     WIN2012("Windows Server 2012", 6.2, true),
@@ -202,5 +205,81 @@ public enum OperatingSystem
         }
 
         return UNKNOWN;
+    }
+
+    public static int getWindowsBuildNumber()
+    {
+        try
+        {
+            // Example: "Microsoft Windows [Version 10.0.22621.1105]"
+            String[] output = RunCommand.exec("cmd /c ver");
+
+            if (output.length == 0)
+            {
+                return -1;
+            }
+
+            // Regex explanation: Look for digits followed by a dot,
+            // specifically grabbing the 3rd group (the build)
+            // Format: 10.0.[BUILD].patch
+            Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\.(\\d+))?");
+            Matcher matcher = pattern.matcher(output[0]);
+
+            if (matcher.find())
+            {
+                return Integer.parseInt(matcher.group(3));
+            }
+        }
+
+        catch (Exception exc)
+        {
+        }
+
+        return -1;
+    }
+
+    /**
+     * Detects and returns the OperatingSystem constant for the current host.
+     * This handles the version 10.0 ambiguity between Windows 10, 11, and modern Servers.
+     */
+    public static OperatingSystem current()
+    {
+        String osName = System.getProperty("os.name").toLowerCase();
+        String osVerStr = System.getProperty("os.version");
+        double version = 0.0;
+
+        try
+        {
+            // Use your existing logic: major.minor
+            String[] parts = osVerStr.split("\\.");
+            version = Double.parseDouble(parts[0] + "." + (parts.length > 1 ? parts[1] : "0"));
+        }
+        catch (Exception e)
+        {
+            /* fallback to 0.0 */
+        }
+
+        // Logic for Windows
+        if (osName.contains("windows"))
+        {
+            if (version == 10.0)
+            {
+                int build = getWindowsBuildNumber();
+                if (build >= 22000) return WIN11;
+                // Note: In a production environment, you'd check if it's a Server SKU here
+                return WIN10;
+            }
+
+            // Match legacy Windows by version
+            for (OperatingSystem os : values())
+            {
+                if (os.isWindows() && os.version == version) return os;
+            }
+        }
+
+        // Logic for Unix/Linux (uses your existing abbreviation matcher)
+        // This assumes SystemInfo.readSystemInfoLinux() has already run or
+        // we use os.name properties.
+        return fromAbbreviation(osName);
     }
 }

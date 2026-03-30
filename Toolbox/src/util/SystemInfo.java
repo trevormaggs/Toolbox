@@ -14,8 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Provides a centralised utility for retrieving core system metadata, including hardware
- * architecture, network identity, and operating system specifics.
+ * Provides a centralised utility for retrieving core system properties, including hardware
+ * architecture, network identity, and operating system details.
  * 
  * <p>
  * Data is captured once during class initialisation and stored in an internal immutable-like state
@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
  * <li>Architecture type ie x86, amd64 etc</li>
  * <li>Architecture data model, 32-bit or 64-bit</li>
  * </ul>
- *
  *
  * <p>
  * <b>Change History</b>
@@ -101,7 +100,7 @@ public final class SystemInfo
         private String hostname;
         private String ip_address;
         private String architecture;
-        private byte data_model;
+        private int data_model;
         private String version;
         private OperatingSystem platform;
 
@@ -209,7 +208,22 @@ public final class SystemInfo
      */
     public static double getOsVersionDigit()
     {
-        return (sysInfo.version.matches("-?\\d+(\\.\\d+)?") ? Double.parseDouble(sysInfo.version) : 0);
+        String ver = sysInfo.version;
+
+        if (ver != null && !ver.isEmpty())
+        {
+
+            try
+            {
+                return Double.parseDouble(ver.split("\\.")[0] + "." + (ver.contains(".") ? ver.split("\\.")[1] : "0"));
+            }
+
+            catch (Exception exc)
+            {
+            }
+        }
+
+        return 0.0;
     }
 
     /**
@@ -225,9 +239,9 @@ public final class SystemInfo
     /**
      * Returns the Architecture Data Model of the JRE, either 32-bit or 64-bit.
      *
-     * @return 32-bit or 64-bit as a byte value
+     * @return 32-bit or 64-bit as an integer value
      */
-    public static byte getArchitectureDataModel()
+    public static int getArchitectureDataModel()
     {
         return sysInfo.data_model;
     }
@@ -254,8 +268,8 @@ public final class SystemInfo
      * Evaluates if the current operating system matches against the specified set.
      * 
      * @param osNameSet
-     *        A set of {@link OperatingSystem} constants to check against.
-     * @return {@code true} if the current platform is contained within the set.
+     *        A set of {@link OperatingSystem} constants to check against
+     * @return {@code true} if the current platform is contained within the set
      * 
      * @throws IllegalArgumentException
      *         if the specified set is null or empty
@@ -452,7 +466,7 @@ public final class SystemInfo
     private static void readJavaArchitectureInfo()
     {
         sysInfo.architecture = OS_ARCH;
-        sysInfo.data_model = Byte.valueOf(System.getProperty("sun.arch.data.model"));
+        sysInfo.data_model = Integer.parseInt(System.getProperty("sun.arch.data.model", "64"));
     }
 
     /**
@@ -739,18 +753,37 @@ public final class SystemInfo
     {
         double actualVer = (OS_VERSION.matches("-?\\d+(\\.\\d+)?") ? Double.parseDouble(OS_VERSION) : 0);
 
+        sysInfo.version = OS_VERSION;
+
+        // Firstly, handle the "10.0" Family (Win 10, 11, Server 2016/19/22)
+        if (actualVer == 10.0)
+        {
+            int build = OperatingSystem.getWindowsBuildNumber();
+
+            // Windows 11 / Server 2022 threshold
+            if (build >= 22000)
+            {
+                sysInfo.platform = OperatingSystem.WIN11;
+            }
+
+            else
+            {
+                sysInfo.platform = OperatingSystem.WIN10;
+            }
+
+            return;
+        }
+
         for (OperatingSystem os : OperatingSystem.values())
         {
-            if (os.getVersion() == actualVer && os.getRealName().equalsIgnoreCase(OS_NAME))
+            if (os.getVersion() == actualVer)
             {
                 sysInfo.platform = os;
-                sysInfo.version = OS_VERSION;
-
                 return;
             }
         }
 
-        throw new IOException("Unable to query the Windows Operating System");
+        throw new IOException("Unable to query the Windows Operating System: " + OS_NAME + " " + OS_VERSION);
     }
 
     /**
