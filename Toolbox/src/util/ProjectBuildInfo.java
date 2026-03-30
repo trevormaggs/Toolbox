@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,27 +20,27 @@ import java.util.jar.JarFile;
  * Identifies the active {@code JAR} library file from which the current class is running. This
  * utility obtains the file name and the last compilation date and time, effectively capturing the
  * build date of the library.
- * 
+ *
  * <p>
- * This class captures the {@code JAR} name accurately at runtime; however, if a {@code JAR} is not
+ * This class captures the {@code JAR} name accurately at runtime. However, if a {@code JAR} is not
  * used (such as during IDE development), it assumes the name of the current running class instead.
  * </p>
- * 
+ *
  * <p>
  * Change Log:
  * </p>
- * 
+ *
  * <ul>
  * <li>Initial creation on 4 September 2023</li>
  * </ul>
- * 
+ *
  * @author Trevor Maggs
  * @since 4 September 2023
  */
 public final class ProjectBuildInfo
 {
     private Path fpath;
-    private Instant buildInstant;
+    private Instant buildTimestamp;
 
     /**
      * Internal constructor that identifies the source resource (JAR or .class) for the specified
@@ -83,7 +84,7 @@ public final class ProjectBuildInfo
      * {@link #getFullPath()}, this includes only the final name element and its extension, for
      * example: {@code MyLibrary.jar} or {@code MyClass.class}.
      * 
-     * @return the unmodified file name of the resource as a {@link Path} object
+     * @return the file name as a {@link Path} object
      */
     public Path getFileName()
     {
@@ -99,17 +100,17 @@ public final class ProjectBuildInfo
      */
     public String getBuildDate()
     {
-        if (buildInstant == null)
+        if (buildTimestamp == null)
         {
             return "Unknown";
         }
 
-        return LocalDateTime.ofInstant(buildInstant, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy @ hh:mm a"));
+        return LocalDateTime.ofInstant(buildTimestamp, ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd/MM/yyyy @ hh:mm a"));
     }
 
     /**
      * Returns the build date-time as a legacy {@link Date} object. This provides backwards
-     * compatibility with older APIs while representing the same point in time as the captured build
+     * compatibility with older APIs while representing the same point in time as the actual build
      * resource.
      * 
      * <p>
@@ -122,7 +123,30 @@ public final class ProjectBuildInfo
      */
     public Date getFullBuildDate()
     {
-        return Date.from(buildInstant);
+        return Date.from(buildTimestamp);
+    }
+
+    /**
+     * Returns a concise identifier for the resource by extracting the filename
+     * and removing common extensions (.class or .jar) if present.
+     * 
+     * @return a {@link Path} representing the normalized resource name
+     */
+    public Path getShortFileName()
+    {
+        String fileName = fpath.getFileName().toString();
+
+        if (fileName.toLowerCase().endsWith(".class"))
+        {
+            fileName = fileName.substring(0, fileName.length() - 6);
+        }
+
+        else if (fileName.toLowerCase().endsWith(".jar"))
+        {
+            fileName = fileName.substring(0, fileName.length() - 4);
+        }
+
+        return Paths.get(fileName);
     }
 
     /**
@@ -146,36 +170,44 @@ public final class ProjectBuildInfo
     }
 
     /**
-     * Creates a new instance of {@code ProjectBuildInfo} for the specified class. This static
-     * factory method identifies the underlying resource (JAR or class file) and extracts its build
-     * metadata, including the file path and last compilation time.
+     * Resolves the physical resource (JAR or .class file) for the specified class and extracts its
+     * build metadata.
+     * 
+     * <p>
+     * This static factory method serves as the primary entry point for identifying the active
+     * resource location and capturing environmental details, such as the absolute file path and the
+     * last compilation timestamp.
+     * </p>
      * 
      * @param currentClass
-     *        the class used to resolve the active resource location
-     * @return an instance of {@link ProjectBuildInfo} containing the resource location and build
-     *         metadata
+     *        the class reference used to resolve the underlying resource location
+     * @return an initialised {@link ProjectBuildInfo} instance containing the resource
+     *         identity and build metadata
+     * 
+     * @throws NullPointerException
+     *         if the provided {@code currentClass} is null
      */
-    public static ProjectBuildInfo getInstance(Class<?> currentClass)
+    public static ProjectBuildInfo getInstance(final Class<?> currentClass)
     {
         return new ProjectBuildInfo(currentClass);
     }
 
     /**
-     * Internal helper to resolve the resource path and extract build metadata from the specified
-     * URL.
+     * Internal helper to resolve the physical resource path and extract build metadata.
      * 
      * <p>
-     * If the URL points to a JAR file, this method extracts the manifest timestamp. Otherwise, it
-     * resolves to the local class file and uses its filesystem modification time.
+     * If the URL points to a JAR file, it retrieves the entry's timestamp. If the URL points to a
+     * directory, it resolves the local {@code .class} file and extracts the filesystem modification
+     * time.
      * </p>
      * 
      * @param resource
      *        the URL of the active class or JAR resource to be evaluated
      * 
      * @throws URISyntaxException
-     *         if the URL cannot be converted to a valid URI for path resolution
+     *         if the resource URL is malformed or cannot be converted to a valid URI
      * @throws IOException
-     *         if the JAR file or filesystem resource cannot be accessed
+     *         if an I/O error occurs while accessing the JAR or filesystem resource
      */
     private void readBuildInfo(URL resource) throws URISyntaxException, IOException
     {
@@ -184,7 +216,7 @@ public final class ProjectBuildInfo
         if (protocol.equals("file"))
         {
             fpath = Paths.get(resource.toURI());
-            buildInstant = Files.getLastModifiedTime(fpath).toInstant();
+            buildTimestamp = Files.getLastModifiedTime(fpath).toInstant();
         }
 
         else if (protocol.equals("jar"))
@@ -202,7 +234,7 @@ public final class ProjectBuildInfo
             String decodedPath = decodePath(path);
 
             fpath = Paths.get(decodedPath);
-            buildInstant = getJarManifestTimestamp(decodedPath);
+            buildTimestamp = getJarManifestTimestamp(decodedPath);
         }
 
         else if (protocol.equals("rsrc"))
@@ -212,7 +244,7 @@ public final class ProjectBuildInfo
             String jarPath = jarCmd.split("\\s+")[0];
 
             fpath = Paths.get(decodePath(jarPath));
-            buildInstant = getJarManifestTimestamp(fpath.toString());
+            buildTimestamp = getJarManifestTimestamp(fpath.toString());
         }
 
         else
@@ -240,7 +272,7 @@ public final class ProjectBuildInfo
             urlPath = urlPath.substring(1);
         }
 
-        return URLDecoder.decode(urlPath, "UTF-8");
+        return URLDecoder.decode(urlPath, StandardCharsets.UTF_8.name());
     }
 
     /**
@@ -273,26 +305,5 @@ public final class ProjectBuildInfo
 
             return Files.getLastModifiedTime(Paths.get(jarPath)).toInstant();
         }
-    }
-    
-    
-    /**
-     * Returns the short name of the JAR library or the current running class resource, with the
-     * {@code .class} extension name removed, providing a concise identifier for the resource.
-     * 
-     * @return the short name of the resource as a {@link Path} object, without the {@code .class}
-     *         extension
-     */
-    public Path getShortFileName()
-    {
-        String ext = ".class";
-        String str = fpath.getFileName().toString();
-
-        if (str.endsWith(ext))
-        {
-            str = str.substring(0, str.length() - ext.length());
-        }
-
-        return Paths.get(str);
     }
 }

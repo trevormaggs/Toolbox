@@ -25,7 +25,7 @@ util/
 * **System Discovery (`SystemInfo`):** A high-performance utility that captures hardware architecture, network identity, and OS identifications during class initialisation for ease of retrieval.
 * **Platform Mapping (`OperatingSystem`):** A robust Enum-based system that translates raw system properties and environment strings into strongly-typed metadata, supporting such as **Windows and Server variants**, **most Linux variants (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)** and **Unix flavours (AIX, Solaris, FreeBSD, HP-UX)**.
 * **Look-Ahead Iterator (`PeekingIterator`):** An enhanced iterator interface that supports **LL(1)** parsing patterns. It allows developers to "peek" at the next element without advancing the cursor—essential for complex command-line argument processing.
-* **Smart String Joining (`Separator`):** A stateful utility designed for incremental string building. It elegantly manages delimiters in complex loops, ensuring no leading or trailing characters remain without requiring manual "first-element" checks.
+* **Smart String Joining (`Separator`):** A stateful utility designed for StringBuilder loops. It elegantly manages delimiters, ensuring no leading or trailing characters remain without requiring manual "first-element" checks.
 * **Integration Boilerplate:** Helper classes to standardise communication and data flow between disparate Java modules.
 
 ### 🚀 Getting Started
@@ -36,9 +36,9 @@ util/
 #### Installation & Build
 To include these utilities in your local environment:
 1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/trevormaggs/Toolbox.git
-   ```
+```
+	bash git clone [https://github.com/trevormaggs/Toolbox.git](https://github.com/trevormaggs/Toolbox.git)
+```
 
 ### 🤝 Collaboration & Feedback
 
@@ -46,6 +46,6 @@ Maintaining a **positive collaboration** is a priority for this project. If you 
 
 ## ✍️ Credits
 
-This library is developed and maintained by **Trevor Maggs**.
+Developed and maintained by **Trevor Maggs**.
 
 ---
