@@ -166,25 +166,41 @@ public final class RunCommand
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())))
         {
-            String line;
-
-            while ((line = reader.readLine()) != null)
+            while (process.isAlive() || reader.ready())
             {
-                stdoutResults.add(line);
-            }
+                if (reader.ready())
+                {
+                    String line = reader.readLine();
 
-            boolean finished = process.waitFor(30, TimeUnit.SECONDS);
+                    if (line != null)
+                    {
+                        stdoutResults.add(line);
+                    }
+                }
 
-            if (!finished)
-            {
-                // Kill the zombie process if necessary
-                process.destroyForcibly();
+                else
+                {
+                    boolean finished = process.waitFor(10, TimeUnit.SECONDS);
 
-                throw new IOException("Command timed out [" + toString() + "]");
+                    if (!finished)
+                    {
+                        // Kill the zombie process if necessary
+                        process.destroyForcibly();
+
+                        throw new IOException("Command timed out after 5 seconds");
+                    }
+
+                    // Break after one last check for remaining buffer
+                    if (!reader.ready())
+                    {
+                        break;
+                    }
+                }
             }
 
             return process.exitValue();
         }
+
         catch (InterruptedException exc)
         {
             Thread.currentThread().interrupt();
