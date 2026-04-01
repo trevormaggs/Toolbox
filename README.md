@@ -8,7 +8,7 @@ The **Toolbox** provides a set of lightweight, reusable components. Built with *
 ### 📁 Project Structure (util)
 ```text
 util/
-├── OperatingSystem.java  # Platform constants & version metadata
+├── Platform.java         # Platform constants & version metadata
 ├── PeekingIterator.java  # LL(1) Look-ahead utility
 ├── RunCommand.java       # Native process execution wrapper
 ├── SystemInfo.java       # Centralised hardware & OS metadata
@@ -23,7 +23,7 @@ util/
 * **Smart Date Parser:** A robust tool for converting date strings of varying formats into `java.util.Date` and `java.time.ZonedDateTime` objects.
     * *Optimised for **Australian** (DD/MM/YYYY) patterns while maintaining support for standard **US** (MM/DD/YYYY) and **ISO-8601** formats.*
 * **System Discovery (`SystemInfo`):** A high-performance utility that captures hardware architecture, network identity, and OS identifications during class initialisation for ease of retrieval.
-* **Platform Mapping (`OperatingSystem`):** A robust Enum-based system that translates raw system properties and environment strings into strongly-typed metadata, supporting such as **Windows and Server variants**, **most Linux variants (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)** and **Unix flavours (AIX, Solaris, FreeBSD, HP-UX)**.
+* **Platform Mapping (`Platform`):** A robust Enum-based system that translates raw system properties and environment strings into strongly-typed metadata, supporting such as **Windows and Server variants**, **most Linux variants (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)** and **Unix flavours (AIX, Solaris, FreeBSD, HP-UX)**.
 * **Look-Ahead Iterator (`PeekingIterator`):** An enhanced iterator interface that supports **LL(1)** parsing patterns. It allows developers to "peek" at the next element without advancing the cursor—essential for complex command-line argument processing.
 * **Smart String Joining (`Separator`):** A stateful utility designed for StringBuilder loops. It elegantly manages delimiters, ensuring no leading or trailing characters remain without requiring manual "first-element" checks.
 * **Integration Boilerplate:** Helper classes to standardise communication and data flow between disparate Java modules.
