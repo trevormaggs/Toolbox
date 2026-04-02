@@ -425,20 +425,23 @@ public final class SystemInfo
 
         try
         {
-            String[] out = RunCommand.exec("/usr/bin/oslevel");
+            RunCommand rc = RunCommand.run("/usr/bin/oslevel");
 
-            /*
-             * Example in AIX:
-             * # /usr/bin/oslevel
-             * 7.1.0.0
-             */
-            for (String line : out)
+            if (rc.getExitCode() == 0)
             {
-                Matcher m = pattern.matcher(line);
-
-                if (m.find())
+                /*
+                 * Example in AIX:
+                 * # /usr/bin/oslevel
+                 * 7.1.0.0
+                 */
+                for (String line : rc.getStdout())
                 {
-                    return m.group(1);
+                    Matcher m = pattern.matcher(line);
+
+                    if (m.find())
+                    {
+                        return m.group(1);
+                    }
                 }
             }
         }
@@ -467,20 +470,23 @@ public final class SystemInfo
 
         try
         {
-            String[] out = RunCommand.exec("/usr/bin/uname", "-r");
+            RunCommand rc = RunCommand.run("/usr/bin/uname", "-r");
 
-            /*
-             * Example in Solaris:
-             * au10qap8qftels2 $ uname -r
-             * 5.10
-             */
-            for (String line : out)
+            if (rc.getExitCode() == 0)
             {
-                Matcher m = pattern.matcher(line);
-
-                if (m.find())
+                /*
+                 * Example in Solaris:
+                 * au10qap8qftels2 $ uname -r
+                 * 5.10
+                 */
+                for (String line : rc.getStdout())
                 {
-                    return m.group(1);
+                    Matcher m = pattern.matcher(line);
+
+                    if (m.find())
+                    {
+                        return m.group(1);
+                    }
                 }
             }
         }
@@ -567,11 +573,11 @@ public final class SystemInfo
     {
         try
         {
-            String[] output = RunCommand.exec("cmd /c ver");
+            RunCommand rc = RunCommand.run("cmd /c ver");
 
-            if (output != null && output.length > 0)
+            if (rc.getExitCode() == 0 && rc.getStdout().length > 0)
             {
-                for (String line : output)
+                for (String line : rc.getStdout())
                 {
                     if (line == null || line.trim().isEmpty())
                     {
@@ -752,11 +758,11 @@ public final class SystemInfo
             try
             {
                 // Fallback by running a command directly in the OS environment
-                String[] output = RunCommand.exec("hostname");
+                RunCommand rc = RunCommand.run("hostname");
 
-                if (output != null && output.length > 0)
+                if (rc.getExitCode() == 0 && rc.getStdout().length > 0)
                 {
-                    sysInfo.hostname = output[0].split("\\.")[0];
+                    sysInfo.hostname = rc.getStdout()[0].split("\\.")[0];
                 }
             }
 

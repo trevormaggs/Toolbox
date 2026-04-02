@@ -22,12 +22,13 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Trevor Maggs
  * @version 0.5
- * @since 2025-07-11
+ * @since 2 April 2026
  */
 public final class RunCommand
 {
     private final List<String> tokens;
     private List<String> stdoutResults;
+    private int exitCode;
 
     /**
      * Internal constructor that initialises the specified raw string, representing a command.
@@ -35,9 +36,172 @@ public final class RunCommand
      * @param command
      *        the full command string to process
      */
-    private RunCommand(String command)
+    public RunCommand(String command)
     {
+        this.stdoutResults = new ArrayList<>();
         this.tokens = new ArrayList<>(tokenize(command));
+    }
+
+    /**
+     * Appends a single literal argument to the command. The argument is trimmed and added as a
+     * discrete token, ensuring spaces or special characters within the argument do not cause
+     * word-splitting.
+     * 
+     * @param arg
+     *        the argument string to add
+     * @return this instance for method chaining
+     */
+    public RunCommand addArgument(String arg)
+    {
+        if (arg != null && !arg.trim().isEmpty())
+        {
+            tokens.add(arg.trim());
+        }
+        return this;
+    }
+
+    public int getExitCode()
+    {
+        return exitCode;
+    }
+
+    /**
+     * Returns the output captured during execution.
+     * 
+     * @return an array of strings representing each line of output. Returns an empty array if the
+     *         command has not been executed yet or if it produced no output
+     */
+    public String[] getStdout()
+    {
+        return stdoutResults.toArray(new String[0]);
+    }
+
+    /**
+     * Returns a string representation of the reconstructed command line,
+     * with tokens joined by spaces.
+     * 
+     * @return the full command string as it would be presented to the system
+     */
+    @Override
+    public String toString()
+    {
+        return String.join(" ", tokens);
+    }
+
+    /**
+     * Executes the command and captures its output. Standard Error (stderr) is merged into Standard
+     * Output (stdout) to prevent stream deadlocks.
+     * 
+     * <p>
+     * If the process hangs, it will be forcibly terminated after 30 seconds.
+     * </p>
+     *
+     * @return the exit code of the process (typically 0 for success)
+     * 
+     * @throws IOException
+     *         if the execution fails, times out, or is interrupted
+     */
+    public int execute() throws IOException
+    {
+        if (tokens.isEmpty())
+        {
+            throw new IllegalStateException("No command specified");
+        }
+
+        ProcessBuilder pb = new ProcessBuilder(tokens);
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        stdoutResults = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())))
+        {
+            while (process.isAlive() || reader.ready())
+            {
+                if (reader.ready())
+                {
+                    String line = reader.readLine();
+
+                    if (line != null)
+                    {
+                        stdoutResults.add(line);
+                    }
+                }
+
+                else
+                {
+                    if (!process.waitFor(10, TimeUnit.SECONDS))
+                    {
+                        // Kill the zombie process if necessary
+                        process.destroyForcibly();
+
+                        throw new IOException("Command timed out after 10 seconds");
+                    }
+
+                    // Break after one last check for remaining buffer
+                    if (!reader.ready())
+                    {
+                        break;
+
+                    }
+                }
+
+                exitCode = process.exitValue();
+            }
+        }
+
+        catch (InterruptedException exc)
+        {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while executing [" + this + "]", exc);
+        }
+
+        return exitCode;
+    }
+
+    /**
+     * Static factory method that runs the command and returns the instance.
+     * 
+     * @param command
+     *        the base command string (tokenised internally)
+     * @return an array of combined stdout/stderr lines
+     * 
+     * @throws IOException
+     *         if an I/O error occurs, the process times out, or is interrupted
+     */
+    public static RunCommand run(String command) throws IOException
+    {
+        RunCommand rc = new RunCommand(command);
+
+        rc.execute();
+
+        return rc;
+    }
+
+    /**
+     * Static factory method that runs the command and returns the instance.
+     * 
+     * @param command
+     *        the base command string (tokenised internally)
+     * @param args
+     *        additional literal arguments to append
+     * @return an array of combined stdout/stderr lines
+     * 
+     * @throws IOException
+     *         if an I/O error occurs, the process times out, or is interrupted
+     */
+    public static RunCommand run(String command, String...args) throws IOException
+    {
+        RunCommand rc = new RunCommand(command);
+
+        for (String part : args)
+        {
+            rc.addArgument(part);
+        }
+
+        rc.execute();
+
+        return rc;
     }
 
     /**
@@ -55,15 +219,16 @@ public final class RunCommand
      */
     private static List<String> tokenize(String commandLine)
     {
+        List<String> tokens = new ArrayList<>();
+
         if (commandLine == null || commandLine.trim().isEmpty())
         {
-            return new ArrayList<>();
+            return tokens;
         }
 
         boolean escape = false;
         boolean inSingleQuotes = false;
         boolean inDoubleQuotes = false;
-        List<String> tokens = new ArrayList<>();
         StringBuilder current = new StringBuilder();
 
         for (int i = 0; i < commandLine.length(); i++)
@@ -99,10 +264,13 @@ public final class RunCommand
                 inSingleQuotes = !inSingleQuotes;
             }
 
-            else if (Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes && current.length() > 0)
+            else if (Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes)
             {
-                tokens.add(current.toString());
-                current.setLength(0);
+                if (current.length() > 0)
+                {
+                    tokens.add(current.toString());
+                    current.setLength(0);
+                }
             }
 
             else
@@ -119,180 +287,24 @@ public final class RunCommand
         return tokens;
     }
 
-    /**
-     * Appends a single literal argument to the command. The argument is trimmed and added as a
-     * discrete token, ensuring spaces or special characters within the argument do not cause
-     * word-splitting.
-     * 
-     * @param arg
-     *        the argument string to add
-     * @return this instance for method chaining
-     */
-    private RunCommand addArgument(String arg)
-    {
-        if (arg != null && !arg.trim().isEmpty())
-        {
-            tokens.add(arg.trim());
-        }
-
-        return this;
-    }
-
-    /**
-     * Executes the command and captures its output. Standard Error (stderr) is merged into Standard
-     * Output (stdout) to prevent stream deadlocks.
-     * 
-     * <p>
-     * If the process hangs, it will be forcibly terminated after 30 seconds.
-     * </p>
-     *
-     * @return the exit code of the process (typically 0 for success)
-     * 
-     * @throws IOException
-     *         if the execution fails, times out, or is interrupted
-     */
-    private int execute() throws IOException
-    {
-        if (tokens.isEmpty())
-        {
-            throw new IllegalStateException("No command specified.");
-        }
-
-        ProcessBuilder pb = new ProcessBuilder(tokens);
-        pb.redirectErrorStream(true);
-        Process process = pb.start();
-
-        stdoutResults = new ArrayList<>();
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())))
-        {
-            while (process.isAlive() || reader.ready())
-            {
-                if (reader.ready())
-                {
-                    String line = reader.readLine();
-
-                    if (line != null)
-                    {
-                        stdoutResults.add(line);
-                    }
-                }
-
-                else
-                {
-                    boolean finished = process.waitFor(10, TimeUnit.SECONDS);
-
-                    if (!finished)
-                    {
-                        // Kill the zombie process if necessary
-                        process.destroyForcibly();
-
-                        throw new IOException("Command timed out after 5 seconds");
-                    }
-
-                    // Break after one last check for remaining buffer
-                    if (!reader.ready())
-                    {
-                        break;
-                    }
-                }
-            }
-
-            return process.exitValue();
-        }
-
-        catch (InterruptedException exc)
-        {
-            Thread.currentThread().interrupt();
-
-            throw new IOException("Interrupted while executing [" + toString() + "]", exc);
-        }
-    }
-
-    /**
-     * Returns the output captured during execution, combining both Standard Output and Standard
-     * Error.
-     * 
-     * @return an array of output lines; returns an empty array if the command has not yet been
-     *         executed or produced no output
-     */
-    public String[] getStdout()
-    {
-        return (stdoutResults != null ? stdoutResults.toArray(new String[0]) : new String[0]);
-    }
-
-    /**
-     * Executes a command string and returns the captured output lines.
-     * 
-     * @param command
-     *        the command line to execute
-     * @return an array of combined stdout/stderr lines
-     * 
-     * @throws IOException
-     *         if an I/O error occurs, the process times out, or is interrupted
-     */
-    public static String[] exec(String command) throws IOException
-    {
-        return exec(command, new String[0]);
-    }
-
-    /**
-     * Executes a command string with additional literal arguments and returns the captured output
-     * lines.
-     * 
-     * <p>
-     * The {@code args} are added as discrete tokens, which is safer for dynamic input containing
-     * spaces or special characters.
-     * </p>
-     * 
-     * @param command
-     *        the base command string (tokenised internally)
-     * @param args
-     *        additional literal arguments to append
-     * @return an array of combined stdout/stderr lines
-     * 
-     * @throws IOException
-     *         if an I/O error occurs, the process times out, or is interrupted
-     */
-    public static String[] exec(String command, String...args) throws IOException
-    {
-        RunCommand rc = new RunCommand(command);
-
-        for (String part : args)
-        {
-            rc.addArgument(part);
-        }
-
-        int exitCode = rc.execute();
-
-        if (exitCode != 0)
-        {
-            System.err.println("Command failed with exit code: " + exitCode);
-        }
-
-        return rc.getStdout();
-    }
-
-    /**
-     * Returns a string representation of the reconstructed command line,
-     * with tokens joined by spaces.
-     * 
-     * @return the full command string as it would be presented to the system
-     */
-    @Override
-    public String toString()
-    {
-        return String.join(" ", tokens);
-    }
-
     public static void main(String[] args) throws IOException
     {
-        String command = "cmd.exe /c echo 'Hello world' \"and \\\"quotes\\\"\" unquoted\\ arg";
-        String[] result = exec(command);
+        // Example usage
+        // RunCommand result = RunCommand.run("cmd.exe /c echo Hello World");
+        RunCommand result = RunCommand.run("cmd.exe /c echo 'Hello world' \"and \\\"quotes\\\"\" unquoted\\ arg");
 
-        for (String line : result)
+        if (result.getExitCode() == 0)
         {
-            System.out.println("[" + line + "]");
+            System.out.println("Success! Output lines: " + result.getStdout().length);
+
+            for (String line : result.getStdout())
+            {
+                System.out.println("[" + line + "]");
+            }
+        }
+        else
+        {
+            System.err.println("Failed with code: " + result.getExitCode());
         }
     }
 }
