@@ -39,7 +39,7 @@ public final class RunCommand
     public RunCommand(String command)
     {
         this.stdoutResults = new ArrayList<>();
-        this.tokens = new ArrayList<>(tokenize(command));
+        this.tokens = tokenize(command);
     }
 
     /**
@@ -57,6 +57,7 @@ public final class RunCommand
         {
             tokens.add(arg.trim());
         }
+
         return this;
     }
 
@@ -142,7 +143,6 @@ public final class RunCommand
                     if (!reader.ready())
                     {
                         break;
-
                     }
                 }
 
@@ -302,6 +302,7 @@ public final class RunCommand
                 System.out.println("[" + line + "]");
             }
         }
+
         else
         {
             System.err.println("Failed with code: " + result.getExitCode());

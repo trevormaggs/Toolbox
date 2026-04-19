@@ -26,7 +26,7 @@ package util;
  * <li>Updated March 2024: Added support for Windows 11, Windows Server 2022, and advanced Linux
  * distribution detection</li>
  * <li>Updated March 2026: Big improvements in logic in several methods, including detecting the
- * difference between Win10 and Win 11</li>
+ * difference between Win10 and Win 11, plus Windows Server 2025</li>
  * </ul>
  *
  * @author Trevor Maggs
@@ -54,6 +54,7 @@ public enum Platform
     WIN95("Windows 95", 4.0, false, OSFamily.WINDOWS),
 
     // Windows servers
+    WIN2025("Windows Server 2025", 10.0, true, OSFamily.WINDOWS),
     WIN2022("Windows Server 2022", 10.0, true, OSFamily.WINDOWS),
     WIN2019("Windows Server 2019", 10.0, true, OSFamily.WINDOWS),
     WIN2016("Windows Server 2016", 10.0, true, OSFamily.WINDOWS),

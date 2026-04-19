@@ -73,25 +73,27 @@ public final class SystemInfo
         {
             String suseRegex = "^\\s*VERSION\\s+=\\s+([0-9\\.]+)";
 
-            List<LinuxRelease> list = new ArrayList<>();
-            // Latest systems (Ubuntu/Alpine/Amazon Linux)
-            list.add(new LinuxRelease("/etc/os-release", "^ID=[\"']?([^\"']+)[\"']?$", Platform.UNKNOWN));
-            // Debian/Ubuntu
-            list.add(new LinuxRelease("/etc/debian_version", "(\\d+(?:\\.\\d+)*)", Platform.DEBIAN));
-            list.add(new LinuxRelease("/etc/debian_release", "(\\d+(?:\\.\\d+)*)", Platform.DEBIAN));
-            // SuSE / SLES / Novell
-            list.add(new LinuxRelease("/etc/SuSE-release", suseRegex, Platform.SUSE));
-            list.add(new LinuxRelease("/etc/sles-release", suseRegex, Platform.SUSE));
-            list.add(new LinuxRelease("/etc/novell-release", suseRegex, Platform.SUSE));
-            // CentOS / Fedora
-            list.add(new LinuxRelease("/etc/centos-release", "(\\d+(?:\\.\\d+)*)", Platform.CENTOS));
-            list.add(new LinuxRelease("/etc/fedora-release", "Fedora[^\\d]+(\\d+)", Platform.FEDORA));
-            // Red Hat variants
-            list.add(new LinuxRelease("/etc/redhat-release", "\\s*CentOS.*(\\d+(?:\\.\\d+)*)", Platform.CENTOS));
-            list.add(new LinuxRelease("/etc/redhat-release", "\\s*Oracle VM.*(\\d+(?:\\.\\d+)*)", Platform.OVM));
-            list.add(new LinuxRelease("/etc/redhat-release", "Red Hat Enterprise Linux.+?(\\d+(?:\\.\\d+)*)", Platform.RHEL));
-
-            LINUX_RELEASES = Collections.unmodifiableList(list);
+            LINUX_RELEASES = Collections.unmodifiableList(new ArrayList<LinuxRelease>()
+            {
+                {
+                    // Latest systems (Ubuntu/Alpine/Amazon Linux)
+                    add(new LinuxRelease("/etc/os-release", "^ID=[\"']?([^\"']+)[\"']?$", Platform.UNKNOWN));
+                    // Debian/Ubuntu
+                    add(new LinuxRelease("/etc/debian_version", "(\\d+(?:\\.\\d+)*)", Platform.DEBIAN));
+                    add(new LinuxRelease("/etc/debian_release", "(\\d+(?:\\.\\d+)*)", Platform.DEBIAN));
+                    // SuSE / SLES / Novell
+                    add(new LinuxRelease("/etc/SuSE-release", suseRegex, Platform.SUSE));
+                    add(new LinuxRelease("/etc/sles-release", suseRegex, Platform.SUSE));
+                    add(new LinuxRelease("/etc/novell-release", suseRegex, Platform.SUSE));
+                    // CentOS / Fedora
+                    add(new LinuxRelease("/etc/centos-release", "(\\d+(?:\\.\\d+)*)", Platform.CENTOS));
+                    add(new LinuxRelease("/etc/fedora-release", "Fedora[^\\d]+(\\d+)", Platform.FEDORA));
+                    // Red Hat variants
+                    add(new LinuxRelease("/etc/redhat-release", "\\s*CentOS.*(\\d+(?:\\.\\d+)*)", Platform.CENTOS));
+                    add(new LinuxRelease("/etc/redhat-release", "\\s*Oracle VM.*(\\d+(?:\\.\\d+)*)", Platform.OVM));
+                    add(new LinuxRelease("/etc/redhat-release", "Red Hat Enterprise Linux.+?(\\d+(?:\\.\\d+)*)", Platform.RHEL));
+                }
+            });
         }
 
         else
@@ -165,7 +167,7 @@ public final class SystemInfo
      * Private constructor to prevent instantiation.
      * 
      * @throws UnsupportedOperationException
-     *         always.
+     *         always
      */
     private SystemInfo()
     {
@@ -272,7 +274,7 @@ public final class SystemInfo
      */
     public static String getArchitecture()
     {
-        return OS_ARCH;
+        return sysInfo.architecture;
     }
 
     /**
@@ -288,27 +290,27 @@ public final class SystemInfo
     /**
      * Checks whether the platform is a Power PC hardware.
      *
-     * @return boolean true if the hardware is a Power PC system
+     * @return boolean {@code true} if the hardware is a Power PC system
      */
     public static boolean isPowerPcHardware()
     {
-        return OS_ARCH.contains("ppc");
+        return sysInfo.architecture.contains("ppc");
     }
 
     /**
      * Checks whether the platform is a SPARC hardware.
      *
-     * @return boolean true if the hardware is a SPARC type
+     * @return boolean {@code true} if the hardware is a SPARC type
      */
     public static boolean isSparcHardware()
     {
-        return OS_ARCH.contains("sparc");
+        return sysInfo.architecture.contains("sparc");
     }
 
     /**
      * Checks whether the running OS is based on UNIX.
      *
-     * @return true if the OS family is Unix-based (Linux, AIX, etc.).
+     * @return {@code true} if the OS family is Unix-based (Linux, AIX, etc)
      */
     public static boolean isUnixSystem()
     {
@@ -318,7 +320,7 @@ public final class SystemInfo
     /**
      * Checks whether AIX is the current operating system.
      *
-     * @return boolean true if AIX is running
+     * @return boolean {@code true} if AIX is running
      */
     public static boolean isAIX()
     {
@@ -328,7 +330,7 @@ public final class SystemInfo
     /**
      * Checks whether FreeBSD is the current operating system.
      *
-     * @return boolean true if FreeBSD is running
+     * @return boolean {@code true} if FreeBSD is running
      */
     public static boolean isFreeBSD()
     {
@@ -338,7 +340,7 @@ public final class SystemInfo
     /**
      * Checks whether HP-UX is the current operating system.
      *
-     * @return boolean true if HP-UX is running
+     * @return boolean {@code true} if HP-UX is running
      */
     public static boolean isHPUX()
     {
@@ -348,7 +350,7 @@ public final class SystemInfo
     /**
      * Checks whether Solaris is the current operating system.
      *
-     * @return boolean true if Solaris is running
+     * @return boolean {@code true} if Solaris is running
      */
     public static boolean isSolaris()
     {
@@ -358,7 +360,7 @@ public final class SystemInfo
     /**
      * Checks whether Windows is running.
      *
-     * @return boolean true if Windows is running
+     * @return boolean {@code true} if Windows is running
      */
     public static boolean isWindows()
     {
@@ -368,7 +370,7 @@ public final class SystemInfo
     /**
      * Checks whether Linux is running.
      *
-     * @return boolean true if Linux is running
+     * @return boolean {@code true} if Linux is running
      */
     public static boolean isLinux()
     {
@@ -380,7 +382,7 @@ public final class SystemInfo
      * 
      * @param osName
      *        the platform to check
-     * @return boolean {@code true if the specified operating system is present
+     * @return boolean {@code true} if the specified operating system is present
      */
     public static boolean isRunningOS(Platform osName)
     {
@@ -408,24 +410,30 @@ public final class SystemInfo
     }
 
     /**
-     * Queries the AIX operating system to dynamically obtain its current OS version. Note: it
-     * executes {@code oslevel} to find AIX version.
-     *
-     * @return the OS version in the form of String. If unable to compute, it returns "0.0"
+     * Queries the AIX operating system to dynamically obtain its current OS name and its version.
+     * 
+     * Note: it executes {@code oslevel} to find AIX version. If the OS version is unable to be
+     * computed, it returns "0.0".
      * 
      * @throws IOException
      *         if unable to obtain the information
      */
-    private static String readVersionAIX() throws IOException
+    private static void readInfoAIX() throws IOException
     {
-        // Pre-compile the pattern to match AIX versioning (e.g., 7.1 from 7.1.0.0)
-        // Matches optional whitespace, captures major.minor, ignores the rest
         String regex = "^\\s*(\\d+\\.\\d+).*$";
         Pattern pattern = Pattern.compile(regex);
+
+        /*
+         * Pre-compile the pattern to match AIX versioning (e.g., 7.1 from 7.1.0.0)
+         * Matches optional whitespace, captures major.minor, ignores the rest.
+         */
 
         try
         {
             RunCommand rc = RunCommand.run("/usr/bin/oslevel");
+
+            sysInfo.platform = Platform.AIX;
+            sysInfo.version = "0.0";
 
             if (rc.getExitCode() == 0)
             {
@@ -440,7 +448,8 @@ public final class SystemInfo
 
                     if (m.find())
                     {
-                        return m.group(1);
+                        sysInfo.version = m.group(1);
+                        break;
                     }
                 }
             }
@@ -450,20 +459,19 @@ public final class SystemInfo
         {
             throw new IOException("AIX query failed", exc);
         }
-
-        return "0.0";
     }
 
     /**
-     * Queries the Solaris operating system to dynamically obtain its current OS version. Note: it
-     * executes {@code uname -r} to find Solaris version.
-     *
-     * @return the OS version in the form of String. If unable to compute, it returns "0.0"
+     * Queries the Solaris operating system to dynamically obtain the current OS name and its
+     * version.
      * 
+     * Note: it executes {@code uname -r} to find Solaris version. If the OS version is unable to be
+     * computed, it returns "0.0".
+     *
      * @throws IOException
      *         if unable to obtain the information
      */
-    private static String readVersionSolaris() throws IOException
+    private static void readInfoSolaris() throws IOException
     {
         String regex = "^\\s*(\\d+(?:\\.\\d+)*)\\s*$";
         Pattern pattern = Pattern.compile(regex);
@@ -471,6 +479,9 @@ public final class SystemInfo
         try
         {
             RunCommand rc = RunCommand.run("/usr/bin/uname", "-r");
+
+            sysInfo.platform = Platform.SOLARIS;
+            sysInfo.version = "0.0";
 
             if (rc.getExitCode() == 0)
             {
@@ -485,7 +496,8 @@ public final class SystemInfo
 
                     if (m.find())
                     {
-                        return m.group(1);
+                        sysInfo.version = m.group(1);
+                        break;
                     }
                 }
             }
@@ -495,79 +507,88 @@ public final class SystemInfo
         {
             throw new IOException("Solaris query failed", exc);
         }
-
-        return "0.0";
     }
 
     /**
-     * Identifies specific Windows marketing versions based on kernel version and build number.
+     * Identifies specific Windows marketing name and its version based on kernel version and build
+     * number.
      *
-     * @return the named Platform constant
-     * 
      * @throws IOException
      *         if unable to obtain the information
      */
-    private static Platform readSystemInfoWindows()
+    private static void readInfoWindows()
     {
+        Platform plat = Platform.UNKNOWN;
         boolean isServer = OS_NAME.contains("server");
         double actualVer = getOsVersionDigit();
 
         if (Double.compare(actualVer, 5.2) == 0)
         {
-            return isServer ? Platform.WIN2003 : Platform.WINXP64;
+            plat = (isServer ? Platform.WIN2003 : Platform.WINXP64);
         }
 
-        if (Double.compare(actualVer, 10.0) == 0)
+        else if (Double.compare(actualVer, 10.0) == 0)
         {
             int build = resolveWindowsBuild();
 
             if (isServer)
             {
+                if (build >= 26100)
+                {
+                    plat = Platform.WIN2025;
+                }
+                
                 if (build >= 20348)
                 {
-                    return Platform.WIN2022;
+                    plat = Platform.WIN2022;
                 }
 
                 else if (build >= 17763)
                 {
-                    return Platform.WIN2019;
+                    plat = Platform.WIN2019;
                 }
 
                 else
                 {
                     // build >= 14393
-                    return Platform.WIN2016;
+                    plat = Platform.WIN2016;
                 }
             }
 
             else
             {
-                return (build >= 22000) ? Platform.WIN11 : Platform.WIN10;
+                plat = (build >= 22000 ? Platform.WIN11 : Platform.WIN10);
             }
         }
 
-        for (Platform os : Platform.values())
+        else
         {
-            if (os.getOSFamily() == Platform.OSFamily.WINDOWS)
+            for (Platform os : Platform.values())
             {
-                if (Double.compare(os.getVersion(), actualVer) == 0 && os.isServer() == isServer)
+                if (os.getOSFamily() == Platform.OSFamily.WINDOWS)
                 {
-                    return os;
+                    if (Double.compare(os.getVersion(), actualVer) == 0 && os.isServer() == isServer)
+                    {
+                        plat = os;
+                        break;
+                    }
                 }
             }
         }
 
-        return Platform.UNKNOWN;
+        sysInfo.platform = plat;
+        sysInfo.version = String.valueOf(sysInfo.platform.getVersion());
     }
 
     /**
      * Resolves the Windows Build Number by executing the native 'ver' command.
-     * *
+     * 
      * <p>
-     * This is required to distinguish between Windows 10 and Windows 11, as
-     * both report a major version of 10.0 in standard system properties.
+     * This is required to distinguish between Windows 10 and Windows 11, as both report a major
+     * version of 10.0 in standard system properties.
      * </p>
-     * * @return the build number (e.g. 22621 for Win 11), or -1 if it cannot be resolved
+     * 
+     * @return the build number (e.g. 22621 for Win 11), or -1 if it cannot be resolved
      */
     private static int resolveWindowsBuild()
     {
@@ -608,13 +629,12 @@ public final class SystemInfo
     /**
      * Iterates through release files to identify the Linux distribution and version.
      *
-     * @return the named Platform constant
-     * 
      * @throws IOException
      *         if unable to obtain the information
      */
-    private static Platform readSystemInfoLinux()
+    private static void readInfoLinux()
     {
+        String osver = null;
         Platform plat = Platform.UNKNOWN;
 
         for (LinuxRelease info : LINUX_RELEASES)
@@ -629,25 +649,24 @@ public final class SystemInfo
             try (BufferedReader br = Files.newBufferedReader(releaseFile, StandardCharsets.UTF_8))
             {
                 String line;
-                String regex = null;
                 String osrelease = null;
 
                 while ((line = br.readLine()) != null)
                 {
-                    Matcher matcher = info.pattern.matcher(line);
+                    Matcher m = info.pattern.matcher(line);
 
-                    if (matcher.find())
+                    if (m.find())
                     {
                         if (info.plat == Platform.UNKNOWN)
                         {
                             // For example: ID=ubuntu
-                            plat = Platform.fromShortName(matcher.group(1));
+                            plat = Platform.fromShortName(m.group(1));
                         }
 
                         else
                         {
                             plat = info.plat;
-                            regex = matcher.group(1);
+                            osver = m.group(1);
                         }
                     }
 
@@ -661,12 +680,12 @@ public final class SystemInfo
                 {
                     if (osrelease != null)
                     {
-                        sysInfo.version = osrelease;
+                        osver = osrelease;
                     }
 
-                    else if (regex != null)
+                    else if (osver == null)
                     {
-                        sysInfo.version = regex;
+                        osver = "0.0";
                     }
 
                     break;
@@ -675,10 +694,13 @@ public final class SystemInfo
 
             catch (IOException exc)
             {
+                // TODO: add logging or similar
             }
         }
 
-        return plat;
+        sysInfo.platform = plat;
+        sysInfo.version = osver;
+
     }
 
     /**
@@ -688,8 +710,7 @@ public final class SystemInfo
     {
         if (isAIX())
         {
-            sysInfo.platform = Platform.AIX;
-            sysInfo.version = readVersionAIX();
+            readInfoAIX();
         }
 
         else if (isFreeBSD())
@@ -706,19 +727,17 @@ public final class SystemInfo
 
         else if (isSolaris())
         {
-            sysInfo.platform = Platform.SOLARIS;
-            sysInfo.version = readVersionSolaris();
+            readInfoSolaris();
         }
 
         else if (isWindows())
         {
-            sysInfo.platform = readSystemInfoWindows();
-            sysInfo.version = String.valueOf(sysInfo.platform.getVersion());
+            readInfoWindows();
         }
 
         else if (isLinux())
         {
-            sysInfo.platform = readSystemInfoLinux();
+            readInfoLinux();
         }
 
         else
@@ -733,8 +752,8 @@ public final class SystemInfo
      *
      * <p>
      * Prefers the Java Networking API. If a Fully Qualified Domain Name (FQDN) is returned, this
-     * method truncates it to provide the short hostname only, for example: 'server01' instead of
-     * 'server01.network.com'.
+     * method truncates it to provide the short hostname only, for example: @code server01} instead
+     * of @code server01.network.com}.
      * </p>
      *
      * <p>
@@ -795,16 +814,17 @@ public final class SystemInfo
      */
     private static void readJavaArchitectureInfo()
     {
-        sysInfo.architecture = OS_ARCH;
+        String model = System.getProperty("sun.arch.data.model");
 
-        try
+        if (model != null)
         {
-            sysInfo.data_model = Integer.parseInt(System.getProperty("sun.arch.data.model", "64"));
+            sysInfo.data_model = Integer.parseInt(model);
         }
 
-        catch (NumberFormatException exc)
+        else
         {
-            sysInfo.data_model = 64;
+            // Fallback: Check if architecture name contains "64"
+            sysInfo.data_model = OS_ARCH.contains("64") ? 64 : 32;
         }
     }
 }
