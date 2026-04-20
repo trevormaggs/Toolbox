@@ -15,11 +15,13 @@ util/
 ├── SmartDateParser.java  # Date capture and parsing for standard Australian times
 ├── BuildInfo.java        # Runtime build metadata retrieval
 ├── Separator.java        # Stateful delimiter management for StringBuilders
-└── ConsoleBar.java       # Real-time console progress bar renderer
+├── ConsoleBar.java       # Real-time console progress bar renderer
+└── FileChecksum.java     # Efficient cryptographic hashing for file integrity
 ```
 
 ### ✨ Key Features
 
+* **File Integrity (`FileChecksum`):** A high-performance utility for generating **MD5, SHA-1, or SHA-256** hashes. It employs a buffered streaming approach (8KB chunks) to ensure that even multi-gigabyte files can be check-summed without impacting the JVM heap or causing memory exhaustion.
 * **System Discovery (`SystemInfo`):** A high-performance utility that captures hardware architecture, network identity, and OS identifications during class initialisation. It specifically resolves Windows build numbers to distinguish between **Windows 10, 11, and Server variants**.
 * **Native Execution (`RunCommand`):** A streamlined utility for executing external system commands and capturing output. It redirects `stderr` to `stdout` to prevent stream deadlocks and includes a built-in tokeniser to handle complex quoted arguments.
 * **Platform Mapping (`Platform`):** A robust Enum-based system that translates raw system properties into strongly-typed metadata. It supports **Windows/Server**, **major Linux distributions (RHEL, CentOS, Debian, Ubuntu, Fedora, SuSE, Alpine)**, and **Unix flavours (AIX, Solaris, FreeBSD, HP-UX)**.
