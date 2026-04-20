@@ -288,26 +288,4 @@ public final class RunCommand
 
         return tokens;
     }
-
-    public static void main(String[] args) throws IOException
-    {
-        // Example usage
-        // RunCommand result = RunCommand.run("cmd.exe /c echo Hello World");
-        RunCommand result = RunCommand.run("cmd.exe /c echo 'Hello world' \"and \\\"quotes\\\"\" unquoted\\ arg");
-
-        if (result.getExitCode() == 0)
-        {
-            System.out.println("Success! Output lines: " + result.getStdout().length);
-
-            for (String line : result.getStdout())
-            {
-                System.out.println("[" + line + "]");
-            }
-        }
-
-        else
-        {
-            System.err.println("Failed with code: " + result.getExitCode());
-        }
-    }
 }

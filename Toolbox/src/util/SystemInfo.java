@@ -442,6 +442,16 @@ public final class SystemInfo
     }
 
     /**
+     * Displays a human-readable list of basic system properties.
+     * 
+     * @return a String output
+     */
+    public static String displayProperties()
+    {
+        return sysInfo.toString();
+    }
+
+    /**
      * Queries the AIX operating system to dynamically obtain the current OS name and its version.
      * 
      * Note: it executes {@code oslevel} to find AIX version. If it cannot compute the OS version,

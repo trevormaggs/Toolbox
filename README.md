@@ -16,7 +16,7 @@ util/
 ├── BuildInfo.java        # Runtime build metadata retrieval
 ├── Separator.java        # Stateful delimiter management for StringBuilders
 ├── ConsoleBar.java       # Real-time console progress bar renderer
-└── FileChecksum.java     # Efficient cryptographic hashing for file integrity
+└── FileChecksum.java     # Streaming-optimised cryptographic file hashing
 ```
 
 ### ✨ Key Features

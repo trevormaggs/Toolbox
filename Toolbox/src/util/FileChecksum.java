@@ -34,6 +34,108 @@ public final class FileChecksum
     }
 
     /**
+     * Gets the MD5 checksum of the specified file.
+     * 
+     * @param pfile
+     *        the Path representing the file to be checked for integrity
+     * @return the computed checksum in an upper-case hexadecimal format
+     * 
+     * @throws NoSuchAlgorithmException
+     *         if the MD5 algorithm is not available in the environment
+     * @throws IOException
+     *         if an I/O error occurs during file access
+     */
+    public static String getFileMD5checksum(Path pfile) throws NoSuchAlgorithmException, IOException
+    {
+        return generateChecksum(MessageDigest.getInstance("MD5"), pfile);
+    }
+
+    /**
+     * Gets the MD5 checksum of the specified file.
+     * 
+     * @param file
+     *        the file to be checked for integrity
+     * @return the computed checksum in an upper-case hexadecimal format
+     * 
+     * @throws NoSuchAlgorithmException
+     *         if there is a problem when attempting to compute with the hashing algorithm
+     * @throws IOException
+     *         if there is an I/O error
+     */
+    public static String getFileMD5checksum(String file) throws NoSuchAlgorithmException, IOException
+    {
+        return getFileMD5checksum(Paths.get(file));
+    }
+
+    /**
+     * Gets the SHA1 checksum of the specified file.
+     * 
+     * @param pfile
+     *        the Path representing the file to be checked for integrity
+     * @return the computed checksum in an upper-case hexadecimal format
+     * 
+     * @throws NoSuchAlgorithmException
+     *         if there is a problem when attempting to compute with the hashing algorithm
+     * @throws IOException
+     *         if there is an I/O error
+     */
+    public static String getFileSHA1checksum(Path pfile) throws NoSuchAlgorithmException, IOException
+    {
+        return generateChecksum(MessageDigest.getInstance("SHA-1"), pfile);
+    }
+
+    /**
+     * Gets the SHA1 checksum of the specified file.
+     * 
+     * @param file
+     *        the file to be checked for integrity
+     * @return the computed checksum in an upper-case hexadecimal format
+     * 
+     * @throws NoSuchAlgorithmException
+     *         if there is a problem when attempting to compute with the hashing algorithm
+     * @throws IOException
+     *         if there is an I/O error
+     */
+    public static String getFileSHA1checksum(String file) throws NoSuchAlgorithmException, IOException
+    {
+        return getFileSHA1checksum(Paths.get(file));
+    }
+
+    /**
+     * Gets the SHA256 checksum of the specified file.
+     *
+     * @param pfile
+     *        the Path representing the file to be checked for integrity
+     * @return the computed checksum in an upper-case hexadecimal format
+     * 
+     * @throws NoSuchAlgorithmException
+     *         if there is a problem when attempting to compute with the hashing algorithm
+     * @throws IOException
+     *         if there is an I/O error
+     */
+    public static String getFileSHA256checksum(Path pfile) throws NoSuchAlgorithmException, IOException
+    {
+        return generateChecksum(MessageDigest.getInstance("SHA-256"), pfile);
+    }
+
+    /**
+     * Gets the SHA256 checksum of the specified file.
+     * 
+     * @param file
+     *        the file to be checked for integrity
+     * @return the computed checksum in an upper-case hexadecimal format
+     * 
+     * @throws NoSuchAlgorithmException
+     *         if there is a problem when attempting to compute with the hashing algorithm
+     * @throws IOException
+     *         if there is an I/O error
+     */
+    public static String getFileSHA256checksum(String file) throws NoSuchAlgorithmException, IOException
+    {
+        return getFileSHA256checksum(Paths.get(file));
+    }
+
+    /**
      * Performs the hash computation to obtain the checksum based on the specified hashing
      * algorithm.
      * 
@@ -70,113 +172,5 @@ public final class FileChecksum
         }
 
         return sb.toString();
-    }
-
-    /**
-     * Gets the MD5 checksum of the specified file.
-     * 
-     * @param pfile
-     *        the Path representing the file to be checked for integrity
-     * @return the computed checksum in an upper-case hexadecimal format
-     * 
-     * @throws NoSuchAlgorithmException
-     *         if the MD5 algorithm is not available in the environment
-     * @throws IOException
-     *         if an I/O error occurs during file access
-     */
-    public static String getFileMD5checksum(Path pfile) throws NoSuchAlgorithmException, IOException
-    {
-        MessageDigest md5 = MessageDigest.getInstance("MD5");
-
-        return generateChecksum(md5, pfile);
-    }
-
-    /**
-     * Gets the MD5 checksum of the specified file.
-     * 
-     * @param file
-     *        the file to be checked for integrity
-     * @return the computed checksum in an upper-case hexadecimal format
-     * 
-     * @throws NoSuchAlgorithmException
-     *         if there is a problem when attempting to compute with the hashing algorithm
-     * @throws IOException
-     *         if there is an I/O error
-     */
-    public static String getFileMD5checksum(String file) throws NoSuchAlgorithmException, IOException
-    {
-        return getFileMD5checksum(Paths.get(file));
-    }
-
-    /**
-     * Gets the SHA1 checksum of the specified file.
-     * 
-     * @param pfile
-     *        the Path representing the file to be checked for integrity
-     * @return the computed checksum in an upper-case hexadecimal format
-     * 
-     * @throws NoSuchAlgorithmException
-     *         if there is a problem when attempting to compute with the hashing algorithm
-     * @throws IOException
-     *         if there is an I/O error
-     */
-    public static String getFileSHA1checksum(Path pfile) throws NoSuchAlgorithmException, IOException
-    {
-        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
-
-        return generateChecksum(sha1, pfile);
-    }
-
-    /**
-     * Gets the SHA1 checksum of the specified file.
-     * 
-     * @param file
-     *        the file to be checked for integrity
-     * @return the computed checksum in an upper-case hexadecimal format
-     * 
-     * @throws NoSuchAlgorithmException
-     *         if there is a problem when attempting to compute with the hashing algorithm
-     * @throws IOException
-     *         if there is an I/O error
-     */
-    public static String getFileSHA1checksum(String file) throws NoSuchAlgorithmException, IOException
-    {
-        return getFileSHA1checksum(Paths.get(file));
-    }
-
-    /**
-     * Gets the SHA256 checksum of the specified file.
-     *
-     * @param pfile
-     *        the Path representing the file to be checked for integrity
-     * @return the computed checksum in an upper-case hexadecimal format
-     * 
-     * @throws NoSuchAlgorithmException
-     *         if there is a problem when attempting to compute with the hashing algorithm
-     * @throws IOException
-     *         if there is an I/O error
-     */
-    public static String getFileSHA256checksum(Path pfile) throws NoSuchAlgorithmException, IOException
-    {
-        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-
-        return generateChecksum(sha256, pfile);
-    }
-
-    /**
-     * Gets the SHA256 checksum of the specified file.
-     * 
-     * @param file
-     *        the file to be checked for integrity
-     * @return the computed checksum in an upper-case hexadecimal format
-     * 
-     * @throws NoSuchAlgorithmException
-     *         if there is a problem when attempting to compute with the hashing algorithm
-     * @throws IOException
-     *         if there is an I/O error
-     */
-    public static String getFileSHA256checksum(String file) throws NoSuchAlgorithmException, IOException
-    {
-        return getFileSHA256checksum(Paths.get(file));
     }
 }
