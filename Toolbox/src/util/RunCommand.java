@@ -10,14 +10,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * Utility for executing external system commands and capturing combined output lines. Supports
  * platform-independent command invocation (Unix/Linux/Windows).
- * 
+ * *
  * <p>
  * Standard Error (stderr) is redirected to Standard Output (stdout) to prevent process deadlocks
- * caused by unbuffered error streams.
+ * caused by unbuffered error streams. This ensures all process feedback is captured within a single
+ * list of results.
  * </p>
  *
  * <p>
- * <b>Note:</b> On Windows, use {@code cmd.exe /c} to run built-in shell commands.
+ * <b>Note:</b> On Windows, built-in shell commands (such as {@code dir} or {@code echo}) must be
+ * invoked via {@code cmd.exe /c}.
  * </p>
  *
  * @author Trevor Maggs
@@ -145,9 +147,9 @@ public final class RunCommand
                         break;
                     }
                 }
-
-                exitCode = process.exitValue();
             }
+            
+            exitCode = process.exitValue();            
         }
 
         catch (InterruptedException exc)

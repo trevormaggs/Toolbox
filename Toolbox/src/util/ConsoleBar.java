@@ -82,7 +82,9 @@ public final class ConsoleBar
             }
         }
 
-        System.out.printf("] %3d%%", percent);
+        sb.append("] %3d%%");
+
+        System.out.printf(sb.toString(), percent);
 
         if (current >= total)
         {

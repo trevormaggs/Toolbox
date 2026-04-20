@@ -38,7 +38,39 @@ import java.util.regex.Pattern;
  * files.</li>
  * <li><b>Network Diagnostics:</b> Provides short-name hostname resolution and IP address
  * discovery.</li>
- * <li><b>Resource Efficiency:</b> Uses lazy-style static initialization to minimize memory
+ * <li><b>Resource Efficiency:</b> Uses lazy-style static initialisation to reduce memory footprint
+ * on non-Linux systems.</li>
+ * </ul>
+ *
+ * @author Trevor Maggs
+ * @version 0.4
+ * @since 1 April 2026
+ */
+
+/**
+ * A comprehensive utility for retrieving detailed system information, including operating system
+ * distribution, versioning, network identity, and hardware architecture.
+ *
+ * <p>
+ * This utility significantly extends the standard {@code System.getProperty} capabilities. While
+ * standard Java 8 often identifies Windows 11 as "Windows 10", this class resolves the underlying
+ * build numbers to provide accurate marketing names. It also performs deep-scanning of Linux
+ * filesystem release files to identify specific distributions such as Ubuntu, RHEL, and Amazon
+ * Linux.
+ * </p>
+ *
+ * <p>
+ * <b>Key Features:</b>
+ * </p>
+ * *
+ * <ul>
+ * <li><b>Precise Windows Mapping:</b> Distinguishes between Workstation and Server variants, such
+ * as Windows 10 vs. Server 2016.</li>
+ * <li><b>Linux Flavour Detection:</b> Scans {@code /etc/os-release} and other distribution-specific
+ * files.</li>
+ * <li><b>Network Diagnostics:</b> Provides short-name hostname resolution and IP address
+ * discovery.</li>
+ * <li><b>Resource Efficiency:</b> Utilises lazy-style static initialisation to reduce memory
  * footprint on non-Linux systems.</li>
  * </ul>
  *
@@ -354,7 +386,7 @@ public final class SystemInfo
      */
     public static boolean isSolaris()
     {
-        return (OS_NAME.startsWith("solaris") || OS_NAME.startsWith("sunos") || OS_NAME.startsWith("sun os"));
+        return (OS_NAME.startsWith("solaris") || OS_NAME.startsWith("sun"));
     }
 
     /**
@@ -410,10 +442,10 @@ public final class SystemInfo
     }
 
     /**
-     * Queries the AIX operating system to dynamically obtain its current OS name and its version.
+     * Queries the AIX operating system to dynamically obtain the current OS name and its version.
      * 
-     * Note: it executes {@code oslevel} to find AIX version. If the OS version is unable to be
-     * computed, it returns "0.0".
+     * Note: it executes {@code oslevel} to find AIX version. If it cannot compute the OS version,
+     * it returns "0.0".
      * 
      * @throws IOException
      *         if unable to obtain the information
@@ -465,8 +497,8 @@ public final class SystemInfo
      * Queries the Solaris operating system to dynamically obtain the current OS name and its
      * version.
      * 
-     * Note: it executes {@code uname -r} to find Solaris version. If the OS version is unable to be
-     * computed, it returns "0.0".
+     * Note: it executes {@code uname -r} to find Solaris version. If it cannot compute the OS
+     * version, it returns "0.0".
      *
      * @throws IOException
      *         if unable to obtain the information
@@ -537,8 +569,8 @@ public final class SystemInfo
                 {
                     plat = Platform.WIN2025;
                 }
-                
-                if (build >= 20348)
+
+                else if (build >= 20348)
                 {
                     plat = Platform.WIN2022;
                 }
@@ -581,7 +613,7 @@ public final class SystemInfo
     }
 
     /**
-     * Resolves the Windows Build Number by executing the native 'ver' command.
+     * Resolves the Windows Build Number by executing the native {@code ver} command.
      * 
      * <p>
      * This is required to distinguish between Windows 10 and Windows 11, as both report a major
@@ -700,7 +732,6 @@ public final class SystemInfo
 
         sysInfo.platform = plat;
         sysInfo.version = osver;
-
     }
 
     /**
@@ -753,7 +784,7 @@ public final class SystemInfo
      * <p>
      * Prefers the Java Networking API. If a Fully Qualified Domain Name (FQDN) is returned, this
      * method truncates it to provide the short hostname only, for example: @code server01} instead
-     * of @code server01.network.com}.
+     * of {@code server01.network.com}.
      * </p>
      *
      * <p>
