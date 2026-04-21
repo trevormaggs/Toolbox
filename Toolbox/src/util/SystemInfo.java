@@ -30,38 +30,6 @@ import java.util.regex.Pattern;
  * <p>
  * <b>Key Features:</b>
  * </p>
- * 
- * <ul>
- * <li><b>Precise Windows Mapping:</b> Distinguishes between Workstation and Server variants, such
- * as Windows 10 vs. Server 2016.</li>
- * <li><b>Linux Flavor Detection:</b> Scans {@code /etc/os-release} and other distribution-specific
- * files.</li>
- * <li><b>Network Diagnostics:</b> Provides short-name hostname resolution and IP address
- * discovery.</li>
- * <li><b>Resource Efficiency:</b> Uses lazy-style static initialisation to reduce memory footprint
- * on non-Linux systems.</li>
- * </ul>
- *
- * @author Trevor Maggs
- * @version 0.4
- * @since 1 April 2026
- */
-
-/**
- * A comprehensive utility for retrieving detailed system information, including operating system
- * distribution, versioning, network identity, and hardware architecture.
- *
- * <p>
- * This utility significantly extends the standard {@code System.getProperty} capabilities. While
- * standard Java 8 often identifies Windows 11 as "Windows 10", this class resolves the underlying
- * build numbers to provide accurate marketing names. It also performs deep-scanning of Linux
- * filesystem release files to identify specific distributions such as Ubuntu, RHEL, and Amazon
- * Linux.
- * </p>
- *
- * <p>
- * <b>Key Features:</b>
- * </p>
  * *
  * <ul>
  * <li><b>Precise Windows Mapping:</b> Distinguishes between Workstation and Server variants, such
@@ -864,7 +832,6 @@ public final class SystemInfo
 
         else
         {
-            // Fallback: Check if architecture name contains "64"
             sysInfo.data_model = OS_ARCH.contains("64") ? 64 : 32;
         }
     }
