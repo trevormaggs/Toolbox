@@ -53,14 +53,14 @@ import java.util.Map;
  */
 public final class SmartDateParser
 {
-    private static final String[] DATE_SEPARATORS = {"/", "-", ":", " "};
+    private static final String[] DATE_SEPARATORS = {"/", "-", ":", " ", "."};
     private static final String[] TIME_FORMATS = {" HH:mm:ss", " HH:mm", ""};
     private static final List<DatePattern> MAP_PATTERN = new ArrayList<>();
 
     static
     {
         Map<String, String> regexMap = new LinkedHashMap<String, String>();
-        
+
         // For Australian Date formats
         regexMap.put("y[sep]M[sep]d", "\\d{4}[sep]\\d{1,2}[sep]\\d{1,2}"); // EXIF Standard
         regexMap.put("d[sep]M[sep]y", "\\d{1,2}[sep]\\d{1,2}[sep]\\d{4}"); // AU Numerical
@@ -71,7 +71,6 @@ public final class SmartDateParser
         // ISO-8601 / T-Format (Strict Pattern)
         MAP_PATTERN.add(new DatePattern("\\d{4}-\\d{1,2}-\\d{1,2}T\\d{1,2}:\\d{1,2}:\\d{1,2}.*", "yyyy-M-d'T'HH:mm:ss", true));
 
-        
         for (Map.Entry<String, String> entry : regexMap.entrySet())
         {
             for (String sep : DATE_SEPARATORS)
@@ -135,25 +134,25 @@ public final class SmartDateParser
     }
 
     /**
-     * Attempts to parse a string into a {@link ZonedDateTime} object by matching it against a list
-     * of known patterns, including ISO-8601 and regional variations.
+     * Attempts to parse a raw date string into a {@link ZonedDateTime} object by matching it
+     * against a collection of supported date and time patterns.
      * 
      * <p>
-     * If the input string contains an explicit UTC offset (e.g., in XMP metadata), it is preserved.
-     * If no offset is detected, the resulting object is normalised to the system's
-     * {@link ZoneId#systemDefault()}.
+     * This method prioritises ISO-8601 full date-time formats before falling back to common
+     * regional patterns (e.g., Australian DD/MM/YYYY). If a pattern matches but lacks timezone
+     * data, the system's default {@link ZoneId} is applied.
      * </p>
      * 
      * @param input
-     *        the date string to convert
-     * @return a {@link ZonedDateTime} object, or {@code null} if parsing fails
+     *        the raw date string to be parsed, such as "23/04/2026" or "2026-04-23T20:00:00Z"
+     * @return a valid {@code ZonedDateTime} representing the input
      * 
      * @throws IllegalArgumentException
      *         if the input is null or does not match any known format
      */
     public static ZonedDateTime convertToZonedDateTime(String input)
     {
-        if (input != null)
+        if (input != null && !input.trim().isEmpty())
         {
             String normalised = input.trim();
 
