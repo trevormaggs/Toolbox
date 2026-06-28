@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -184,6 +185,54 @@ public final class SmartDateParser
         }
 
         throw new IllegalArgumentException("Unsupported ZonedDateTime format [" + input + "]");
+    }
+
+    /**
+     * Formats a raw date string as a localised, human-readable timestamp using the specified
+     * {@link Locale}.
+     *
+     * @param input
+     *        the raw date string to parse and format
+     * @param locale
+     *        the locale used for localisation rules (for example, {@code Locale.UK} or
+     *        {@code Locale.FRANCE})
+     * @return a localised string representation of the date and time
+     *
+     * @throws IllegalArgumentException
+     *         if the input cannot be parsed using any supported date format
+     */
+    public static String convertToLocalisedDateTime(String input, Locale locale)
+    {
+        ZonedDateTime zdt = convertToZonedDateTime(input);
+
+        return convertToLocalisedDateTime(zdt, locale);
+    }
+
+    /**
+     * Formats a {@link ZonedDateTime} as a localised, human-readable timestamp using the specified
+     * {@link Locale}.
+     *
+     * @param dateTime
+     *        the date and time to format
+     * @param locale
+     *        the locale used for localisation rules
+     * @return a localised string representation of the date and time
+     */
+    public static String convertToLocalisedDateTime(ZonedDateTime dateTime, Locale locale)
+    {
+        if (dateTime == null)
+        {
+            return "Unknown";
+        }
+
+        Locale targetLocale = (locale != null) ? locale : Locale.getDefault();
+
+        // Localised MEDIUM date and SHORT time styles are suitable for metadata display.
+        // For example: "23 Apr 2026, 8:00 pm" (en_AU) or "23 avr. 2026, 20:00" (fr_FR).
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(targetLocale);
+
+        return dateTime.format(formatter);
     }
 
     /**
