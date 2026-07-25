@@ -146,40 +146,43 @@ public final class SmartDateParser
      * 
      * @param input
      *        the raw date string to be parsed, such as "23/04/2026" or "2026-04-23T20:00:00Z"
-     * @return a valid {@code ZonedDateTime} representing the input
+     * @return a valid {@code ZonedDateTime} representing the input or null if the input is not
+     *         defined correctly
      * 
      * @throws IllegalArgumentException
-     *         if the input is null or does not match any known format
+     *         if the input does not match any known format
      */
     public static ZonedDateTime convertToZonedDateTime(String input)
     {
-        if (input != null && !input.trim().isEmpty())
+        if (input == null || input.trim().isEmpty())
         {
-            String normalised = input.trim();
+            return null;
+        }
 
-            for (DatePattern map : MAP_PATTERN)
+        String normalised = input.trim();
+
+        for (DatePattern map : MAP_PATTERN)
+        {
+            if (normalised.matches(map.regex))
             {
-                if (normalised.matches(map.regex))
+                try
                 {
-                    try
+                    if (map.isFullDateTime)
                     {
-                        if (map.isFullDateTime)
-                        {
-                            return parseZonedISO_8601(normalised);
-                        }
-
-                        LocalDateTime ldt = parseToLocalDateTime(normalised, map.formatPattern);
-
-                        if (ldt != null)
-                        {
-                            return ldt.atZone(ZoneId.systemDefault());
-                        }
+                        return parseZonedISO_8601(normalised);
                     }
 
-                    catch (Exception exc)
+                    LocalDateTime ldt = parseToLocalDateTime(normalised, map.formatPattern);
+
+                    if (ldt != null)
                     {
-                        // Fall through to next pattern
+                        return ldt.atZone(ZoneId.systemDefault());
                     }
+                }
+
+                catch (Exception exc)
+                {
+                    // Fall through to next pattern
                 }
             }
         }
