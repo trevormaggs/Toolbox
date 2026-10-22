@@ -15,8 +15,9 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * A flexible utility for converting date strings of varying formats into {@link Date} and
- * {@link ZonedDateTime} objects.
+ * /**
+ * A flexible utility for converting date strings of varying formats into {@link Date},
+ * {@link LocalDateTime}, and {@link ZonedDateTime} objects.
  * 
  * <p>
  * <b>Regional Support and Ambiguity: </b>This parser is optimised for <b>Australian/British
@@ -131,7 +132,24 @@ public final class SmartDateParser
     {
         ZonedDateTime zdt = convertToZonedDateTime(input);
 
-        return Date.from(zdt.toInstant());
+        return (zdt != null ? Date.from(zdt.toInstant()) : null);
+    }
+
+    /**
+     * Attempts to parse a raw date string into a {@link LocalDateTime}.
+     *
+     * @param input
+     *        the raw date string to parse
+     * @return the parsed local date and time, or {@code null} if the input is null or blank
+     *
+     * @throws IllegalArgumentException
+     *         if the input does not match any supported date format
+     */
+    public static LocalDateTime convertToLocalDateTime(String input)
+    {
+        ZonedDateTime zdt = convertToZonedDateTime(input);
+
+        return (zdt != null ? zdt.toLocalDateTime() : null);
     }
 
     /**
