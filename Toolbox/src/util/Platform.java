@@ -219,7 +219,7 @@ public enum Platform
      * Searches for a matching Operating System enumeration value based on the specified abbreviated
      * name, such as {@code ubuntu}, {@code amzn}, or {@code WIN10}.
      *
-     * @param shortName
+     * @param osName
      *        the Operating System name in its short or abbreviated name format
      * @return an enumeration value if a match is found; otherwise {@link #UNKNOWN}
      */

@@ -522,9 +522,6 @@ public final class SystemInfo
     /**
      * Identifies specific Windows marketing name and its version based on kernel version and build
      * number.
-     *
-     * @throws IOException
-     *         if unable to obtain the information
      */
     private static void readInfoWindows()
     {
@@ -638,9 +635,6 @@ public final class SystemInfo
 
     /**
      * Iterates through release files to identify the Linux distribution and version.
-     *
-     * @throws IOException
-     *         if unable to obtain the information
      */
     private static void readInfoLinux()
     {
