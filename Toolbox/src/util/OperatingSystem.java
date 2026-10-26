@@ -108,6 +108,22 @@ public enum OperatingSystem
     }
 
     /**
+     * Determines whether an operating system enumeration value exists with the specified name. The
+     * name is the enum constant name, such as {@code WIN2012R2} or {@code WIN10}.
+     *
+     * @param osName
+     *        the abbreviated operating system name
+     * @return {@code true} if a matching operating system is found, otherwise {@code false}
+     *
+     * @throws NullPointerException
+     *         if {@code osName} is {@code null}
+     */
+    public static boolean contains(String osName)
+    {
+        return (getName(osName) != null);
+    }
+
+    /**
      * Returns the operating system enumeration value with the specified name, ignoring case. The
      * name is the enum constant name, such as {@code WIN2012R2} or {@code WIN10}.
      *
@@ -137,32 +153,32 @@ public enum OperatingSystem
      * Returns the first operating system enumeration value whose full real name contains a match
      * for the specified regular expression, ignoring case.
      *
-     * @param osName
+     * @param regex
      *        the regular expression to match against the full real names of the operating systems
      * @return the first matching operating system, or {@code null} if no match is found
      *
      * @throws NullPointerException
-     *         if {@code osName} is {@code null}
+     *         if {@code regex} is {@code null}
      * @throws IllegalArgumentException
      *         if the regular expression has a syntax error
      */
-    public static OperatingSystem getNameExtended(String osName)
+    public static OperatingSystem getNameByRegex(String regex)
     {
-        Objects.requireNonNull(osName, "Input operating system name cannot be null");
+        Objects.requireNonNull(regex, "Input regular expression cannot be null");
 
         final Pattern pattern;
 
         try
         {
-            pattern = Pattern.compile(osName, Pattern.CASE_INSENSITIVE);
+            pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         }
 
         catch (PatternSyntaxException exc)
         {
-            throw new IllegalArgumentException("Pattern syntax error in [" + osName + "] regular expression", exc);
+            throw new IllegalArgumentException("Pattern syntax error in [" + regex + "] regular expression", exc);
         }
 
-        for (OperatingSystem os : OperatingSystem.values())
+        for (OperatingSystem os : values())
         {
             if (pattern.matcher(os.getRealName()).find())
             {
