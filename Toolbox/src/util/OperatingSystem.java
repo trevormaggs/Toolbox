@@ -56,7 +56,8 @@ public enum OperatingSystem
     WIN95("Windows 95", 4.0, false),
     NT351("Windows NT", 3.51, true),
     NT35("Windows NT", 3.5, true),
-    NT31("Windows NT", 3.1, true);
+    NT31("Windows NT", 3.1, true),
+    UNKNOWN("Unknown", 0.0, false);
     /*
      * Note, Windows Server 2003 R2 also exists. Use native code to check.
      * Refer to MSDN for coding details.
@@ -129,7 +130,7 @@ public enum OperatingSystem
      *
      * @param osName
      *        the abbreviated operating system name
-     * @return the matching operating system, or {@code null} if no match is found
+     * @return the matching operating system, or {@code UNKNOWN} if no match is found
      * 
      * @throws NullPointerException
      *         if {@code osName} is {@code null}
@@ -146,7 +147,7 @@ public enum OperatingSystem
             }
         }
 
-        return null;
+        return UNKNOWN;
     }
 
     /**
@@ -155,7 +156,7 @@ public enum OperatingSystem
      *
      * @param regex
      *        the regular expression to match against the full real names of the operating systems
-     * @return the first matching operating system, or {@code null} if no match is found
+     * @return the first matching operating system, or {@code UNKNOWN} if no match is found
      *
      * @throws NullPointerException
      *         if {@code regex} is {@code null}
@@ -186,6 +187,6 @@ public enum OperatingSystem
             }
         }
 
-        return null;
+        return UNKNOWN;
     }
 }
