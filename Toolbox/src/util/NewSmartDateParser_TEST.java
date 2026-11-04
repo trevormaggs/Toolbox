@@ -92,7 +92,7 @@ import java.util.regex.Pattern;
  * @version 1.5
  * @since 19 January 2026
  */
-public final class SmartDateParser_v2
+public final class NewSmartDateParser_TEST
 {
     /** Longest input accepted. Real dates are well under this, even with a region id. */
     private static final int MAX_INPUT_LENGTH = 100;
@@ -220,7 +220,7 @@ public final class SmartDateParser_v2
      * @throws UnsupportedOperationException
      *         to indicate that instantiation is not supported
      */
-    private SmartDateParser_v2()
+    private NewSmartDateParser_TEST()
     {
         throw new UnsupportedOperationException("Not intended for instantiation");
     }
