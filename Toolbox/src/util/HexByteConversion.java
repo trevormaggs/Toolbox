@@ -12,8 +12,7 @@ import java.util.Objects;
  * <p>
  * Decoding accepts only the ASCII hexadecimal characters {@code 0-9}, {@code A-F}, and {@code a-f}.
  * Non-ASCII Unicode digits, fullwidth letters, and odd-length inputs are rejected with an
- * exception.
- * Supports leading hash notation (e.g., RGB values like {@code #3478F0}).
+ * exception. Supports leading hash notation (e.g., RGB values like {@code #3478F0}).
  * </p>
  */
 public final class HexByteConversion
@@ -61,11 +60,11 @@ public final class HexByteConversion
      * the default charset (UTF-8).
      *
      * @param object
-     *        A String, byte[], ByteBuffer, or char[] containing hex digits
-     * @return A byte array containing the decoded binary data
+     *        either a String, byte[], ByteBuffer, or char[] containing hex digits
+     * @return an array of bytes containing the decoded binary data
+     * 
      * @throws NullPointerException
      *         if the input object is null
-     * 
      * @throws IllegalArgumentException
      *         if the input type is unsupported, has an odd length, or contains invalid characters
      */
@@ -80,10 +79,10 @@ public final class HexByteConversion
      * the specified charset.
      *
      * @param object
-     *        A String, byte[], ByteBuffer, or char[] containing hex digits
+     *        either a String, byte[], ByteBuffer, or char[] containing hex digits
      * @param charset
      *        the Charset to use for decoding binary inputs
-     * @return A byte array containing the decoded binary data
+     * @return an array of bytes containing the decoded binary data
      * 
      * @throws NullPointerException
      *         if the input object or charset is null
@@ -135,9 +134,9 @@ public final class HexByteConversion
     }
 
     /**
-     * Normalises a String by stripping a leading '#' if present (e.g., RGB colors like "#3478F0")
-     * and converting it to a character array.
-     *
+     * Normalises a String by stripping a leading '#' if present and converting it to a character
+     * array. For example, RGB colours typically denote something like "#3478F0"
+     * 
      * @param data
      *        the input string
      * @return the normalised character array
@@ -218,20 +217,22 @@ public final class HexByteConversion
     }
 
     /**
-     * Converts an array of characters representing hexadecimal values into an array of bytes of
-     * those same values. The returned array will be half the length of the passed array, as it
-     * takes two characters to represent any given byte.
+     * Retrieves the result by computing the specified input containing hexadecimal values and
+     * producing an array of bytes with those same values.
+     * 
+     * Since it takes two characters to represent any given byte, the returned array will be half
+     * the length of that input array.
      *
      * @param data
-     *        An array of characters containing hexadecimal digits.
+     *        an array of characters containing hexadecimal digits
      * @param result
-     *        A byte array to contain the binary data decoded from the supplied char array.
+     *        a byte array to contain the binary data decoded from the specified char array
      * @param offset
-     *        The position within {@code result} to start writing the decoded bytes.
-     * @return The number of bytes written to {@code result}.
+     *        the position within {@code result} to start writing the decoded bytes
+     * @return the number of bytes written to {@code result}
      *
      * @throws IllegalArgumentException
-     *         Thrown if an odd number of characters or if the output array is too small.
+     *         if the number of characters is odd or the output array is too small
      */
     private int decodeHex(char[] data, byte[] result, int offset)
     {
@@ -242,22 +243,22 @@ public final class HexByteConversion
             throw new IllegalArgumentException(String.format("Odd number of characters %,d.", len));
         }
 
-        int outLen = len >> 1;
+        int resultLen = len >> 1;
 
-        if (result.length - offset < outLen)
+        if (result.length - offset < resultLen)
         {
             throw new IllegalArgumentException("Output array is not large enough to accommodate decoded data.");
         }
 
         for (int i = offset, j = 0; j < len; i++, j += 2)
         {
-            int high = toInteger(data[j], j) << 4;
-            int low = toInteger(data[j + 1], j + 1);
+            int high = toInteger(data[j]) << 4;
+            int low = toInteger(data[j + 1]);
 
             result[i] = (byte) (high | low);
         }
 
-        return outLen;
+        return resultLen;
     }
 
     /**
@@ -265,14 +266,12 @@ public final class HexByteConversion
      *
      * @param ch
      *        the character to convert (0-9, A-F, a-f)
-     * @param index
-     *        the position of the character in the source data (for error reporting)
      * @return the integer value of the hex digit (0-15)
      * 
      * @throws IllegalStateException
      *         if an unrecognised character is encountered
      */
-    private int toInteger(char ch, int index)
+    private int toInteger(char ch)
     {
         if (ch >= '0' && ch <= '9')
         {
@@ -289,7 +288,7 @@ public final class HexByteConversion
             return ch - 'a' + 10;
         }
 
-        throw new IllegalStateException(String.format("Unrecognised hexadecimal character 0x%02X detected in index %,d.", ch & 0xFFFF, index));
+        throw new IllegalStateException(String.format("Unrecognised hexadecimal character 0x%02X detected.", ch & 0xFFFF));
     }
 
     @Override
