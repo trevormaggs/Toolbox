@@ -144,7 +144,7 @@ public final class HexByteConversion
     private char[] normalize(String data)
     {
         Objects.requireNonNull(data, "String data must not be null");
-        return normalize(data.toCharArray());
+        return normalize(data.trim().toCharArray());
     }
 
     /**
