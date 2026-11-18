@@ -15,7 +15,7 @@ import java.util.Objects;
  * exception. Supports leading hash notation (e.g., RGB values like {@code #3478F0}).
  * </p>
  */
-public final class HexByteConversion
+public final class HexDecoder
 {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private final Charset charset;
@@ -23,7 +23,7 @@ public final class HexByteConversion
     /**
      * Creates a new codec with the default charset {@link #DEFAULT_CHARSET}.
      */
-    private HexByteConversion()
+    private HexDecoder()
     {
         this.charset = DEFAULT_CHARSET;
     }
@@ -34,7 +34,7 @@ public final class HexByteConversion
      * @param charset
      *        the charset to use for decoding binary representations; must not be null
      */
-    private HexByteConversion(Charset charset)
+    private HexDecoder(Charset charset)
     {
         this.charset = Objects.requireNonNull(charset, "Charset must not be null");
     }
@@ -45,7 +45,7 @@ public final class HexByteConversion
      * @param charsetName
      *        the name of the charset to use for decoding
      */
-    private HexByteConversion(String charsetName)
+    private HexDecoder(String charsetName)
     {
         this(Charset.forName(charsetName));
     }
@@ -92,7 +92,7 @@ public final class HexByteConversion
     public static byte[] decode(Object object, Charset charset)
     {
         Objects.requireNonNull(charset, "Charset must not be null");
-        return new HexByteConversion(charset).convert(object);
+        return new HexDecoder(charset).convert(object);
     }
 
     // =========================================================================
