@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Provides an decorated Iterator that supports look-ahead operations via a {@link #peek()} method
- * without advancing the underlying iteration state.
+ * Provides a decorated {@link Iterator} that supports look-ahead operations via a {@link #peek()}
+ * method without advancing the underlying iteration position.
  * 
  * <p>
- * This utility is particularly effective for the left to right advancement parsing or command-line
- * argument processing where the current token determines the handling of the subsequent element.
+ * This utility is particularly useful for left-to-right parsing and command-line argument
+ * processing, where examining the next element before consuming it can determine the appropriate
+ * parsing action. It provides the single-token look-ahead capability commonly used in LL(1)
+ * predictive parsing.
  * </p>
  *
  * <p>
