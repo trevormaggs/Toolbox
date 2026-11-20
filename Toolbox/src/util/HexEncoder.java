@@ -10,7 +10,8 @@ import java.util.Objects;
  * Encodes byte arrays, ByteBuffers, character arrays, and Strings into hexadecimal strings.
  *
  * <p>
- * Supports lowercase ({@code a-f}) and uppercase ({@code A-F}) hexadecimal representations. Text-based inputs can be encoded using a specified charset, with UTF-8 used by default.
+ * Supports lowercase ({@code a-f}) and uppercase ({@code A-F}) hexadecimal representations.
+ * Text-based inputs can be encoded using a specified charset, with UTF-8 used by default.
  * </p>
  */
 public final class HexEncoder
@@ -22,7 +23,7 @@ public final class HexEncoder
     private final boolean upperCase;
 
     /**
-     * Creates a new encoder with the default charset {@link #DEFAULT_CHARSET} and lowercase digits.
+     * Creates a new encoder with the default charset {@code UTF_8} and lowercase digits.
      */
     private HexEncoder()
     {
@@ -36,7 +37,7 @@ public final class HexEncoder
      * @param charsetName
      *        the name of the charset to use for text inputs
      * @param upperCase
-     *        {@code true} for uppercase hex digits (A-F), {@code false} for lowercase (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      */
     private HexEncoder(String charsetName, boolean upperCase)
     {
@@ -49,7 +50,7 @@ public final class HexEncoder
      * @param charset
      *        the charset to use for text inputs; must not be null
      * @param upperCase
-     *        {@code true} for uppercase hex digits (A-F), {@code false} for lowercase (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      */
     private HexEncoder(Charset charset, boolean upperCase)
     {
@@ -113,17 +114,17 @@ public final class HexEncoder
         Objects.requireNonNull(buffer, "Buffer must not be null");
 
         ByteBuffer duplicate = buffer.duplicate();
-        byte[] data = new byte[duplicate.remaining()];
-        duplicate.get(data);
+        byte[] bytes = new byte[duplicate.remaining()];
+        duplicate.get(bytes);
 
-        return toHexString(data, upperCase);
+        return toHexString(bytes, upperCase);
     }
 
     /**
      * Encodes a string into a hexadecimal string using the configured charset.
      *
      * @param data
-     *        the string to encode; must not be null
+     *        the string to encode. It must not be null
      * @return the hexadecimal string representation
      * 
      * @throws NullPointerException
@@ -156,9 +157,7 @@ public final class HexEncoder
      * @param charsetName
      *        the charset to use when converting characters into bytes. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F) or {@code false} for lowercase
-     *        hexadecimal digits (a-f)
-     * 
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a new HexEncoder instance
      */
     public static HexEncoder getInstance(String charsetName, boolean upperCase)
@@ -172,9 +171,7 @@ public final class HexEncoder
      * @param charset
      *        the charset to use when converting characters into bytes. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F) or {@code false} for lowercase
-     *        hexadecimal digits (a-f)
-     * 
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a new HexEncoder instance
      */
     public static HexEncoder getInstance(Charset charset, boolean upperCase)
@@ -190,8 +187,7 @@ public final class HexEncoder
      * @param charset
      *        the charset to use when converting characters into bytes. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F),
-     *        {@code false} for lowercase hexadecimal digits (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a hexadecimal string representation
      * 
      * @throws NullPointerException
@@ -217,8 +213,7 @@ public final class HexEncoder
      * @param charset
      *        the charset to use when converting the string into bytes. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F),
-     *        {@code false} for lowercase hexadecimal digits (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a hexadecimal string representation
      * 
      * @throws NullPointerException
@@ -238,8 +233,7 @@ public final class HexEncoder
      * @param data
      *        the byte array to encode. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F),
-     *        {@code false} for lowercase hexadecimal digits (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a hexadecimal string representation
      * 
      * @throws NullPointerException
@@ -260,8 +254,7 @@ public final class HexEncoder
      * @param buffer
      *        the ByteBuffer to encode. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F),
-     *        {@code false} for lowercase hexadecimal digits (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a hexadecimal string representation
      * 
      * @throws NullPointerException
@@ -284,8 +277,7 @@ public final class HexEncoder
      * @param data
      *        the character array to encode. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F),
-     *        {@code false} for lowercase hexadecimal digits (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a hexadecimal string representation
      * 
      * @throws NullPointerException
@@ -302,8 +294,7 @@ public final class HexEncoder
      * @param data
      *        the string to encode. It must not be null
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F),
-     *        {@code false} for lowercase hexadecimal digits (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return a hexadecimal string representation
      * 
      * @throws NullPointerException
@@ -337,8 +328,7 @@ public final class HexEncoder
      * @param data
      *        the byte array to encode
      * @param upperCase
-     *        {@code true} for uppercase hexadecimal digits (A-F),
-     *        {@code false} for lowercase hexadecimal digits (a-f)
+     *        {@code true} for uppercase hex digits (A-F) or {@code false} for lowercase (a-f)
      * @return the hexadecimal string
      */
     private static String toHexString(byte[] data, boolean upperCase)
@@ -350,8 +340,8 @@ public final class HexEncoder
             throw new IllegalArgumentException("Input data is too large to encode");
         }
 
-        char[] digits = upperCase ? DIGITS_UPPER : DIGITS_LOWER;
         char[] result = new char[data.length << 1];
+        char[] digits = upperCase ? DIGITS_UPPER : DIGITS_LOWER;
 
         for (int i = 0, j = 0; i < data.length; i++)
         {
@@ -361,4 +351,5 @@ public final class HexEncoder
 
         return new String(result);
     }
+
 }

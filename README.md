@@ -45,7 +45,7 @@ util/
 
 * **Smart String Joining (`Separator`):** A stateful utility designed for `StringBuilder` loops. It elegantly manages delimiters by tracking its own state, ensuring no trailing characters remain without requiring manual "first-element" conditional logic.
 
-* **Look-Ahead Iterator (`PeekingIterator`):** An enhanced iterator interface that supports **LL(1)** parsing patterns. It allows developers to "peek" at the next element without advancing the cursor—essential for complex token or argument processing.
+* **Look-Ahead Iterator (PeekingIterator):** An enhanced iterator that supports single-element look-ahead through a `peek()` method, allowing developers to inspect the next element without advancing the iterator. Particularly useful for left-to-right parsing, including LL(1) predictive parsing, and command-line argument processing.
 
 * **Project Build Info:** Automatically identifies the active JAR library or class resource at runtime to retrieve compilation timestamps and build metadata.
 
